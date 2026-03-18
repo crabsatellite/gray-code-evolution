@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<title>Min Degree Theorem — Interactive Proof Explorer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f8f9fa;color:#333}
+
+/* Header */
+header{background:#1a1a2e;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:17px;font-weight:600}
+header h1 sub{font-size:12px}
+.lang-sw{margin-left:auto;display:flex;gap:2px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden}
+.lang-sw button{padding:4px 12px;background:transparent;border:none;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer}
+.lang-sw button.active{background:rgba(255,255,255,.15);color:#ffd700}
+
+/* Progress */
+.progress-bar{display:flex;background:#fff;border-bottom:1px solid #e0e0e0;padding:0 16px;overflow-x:auto}
+.step-dot{padding:10px 14px;font-size:12px;color:#aaa;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
+.step-dot:hover{color:#666}
+.step-dot.active{color:#1a1a2e;border-bottom-color:#ffd700;font-weight:600}
+
+/* Layout */
+.main{display:flex;height:calc(100vh - 95px);min-height:500px}
+.sidebar{width:300px;min-width:300px;background:#fff;border-right:1px solid #e0e0e0;display:flex;flex-direction:column;padding:16px;overflow-y:auto}
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.viz-area{flex:1;position:relative;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+
+/* Sidebar */
+.sidebar h3{font-size:12px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+#sideCanvas{width:268px;height:268px;border:1px solid #eee;border-radius:10px;background:#fafafa;align-self:center}
+.side-info{margin-top:12px;font-size:13px;line-height:1.8}
+.side-info b{color:#e74c3c}
+
+/* Cards */
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:20px;max-width:800px;width:100%}
+.card h2{font-size:18px;margin-bottom:12px;color:#1a1a2e}
+.card p{font-size:14px;line-height:1.8;color:#555;margin-bottom:10px}
+.card .highlight{background:#fff8e1;border-left:4px solid #ffd700;padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+.card .formula{display:inline-block;background:#f0f4ff;padding:4px 10px;border-radius:6px;font-family:'Courier New',monospace;color:#2c3e50;font-size:14px;margin:4px 0}
+.card .try-it{background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:12px;margin:12px 0;font-size:13px}
+.card .try-it b{color:#2e7d32}
+
+/* Controls */
+.ctrl{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap}
+.ctrl label{font-size:13px;color:#666}
+.ctrl select,.ctrl button{padding:6px 14px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff;cursor:pointer}
+.ctrl button{background:#1a1a2e;color:#fff;border:none}
+.ctrl button:hover{background:#2a2a4e}
+.n-btns{display:flex;gap:4px}
+.n-btn{width:34px;height:34px;border:2px solid #ddd;border-radius:8px;background:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:.2s;color:#666}
+.n-btn:hover{border-color:#1a1a2e;color:#1a1a2e}
+.n-btn.active{border-color:#ffd700;background:#fff8e1;color:#c79100}
+.s-btn{width:28px;height:28px;border:2px solid #ddd;border-radius:6px;background:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;color:#666}
+.s-btn:hover{border-color:#1a1a2e;color:#1a1a2e}
+.s-btn.active{border-color:#ffd700;background:#fff8e1;color:#c79100}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+.data-table th{background:#f5f5f5;padding:8px;text-align:center;font-weight:600;border-bottom:2px solid #eee}
+.data-table td{padding:6px 8px;text-align:center;border-bottom:1px solid #f0f0f0}
+.data-table tr.min-row{background:#e8f5e9;font-weight:600}
+.data-table tr:hover{background:#f8f8f8}
+
+/* Bar chart */
+.bar-row{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:12px}
+.bar-label{width:160px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:11px}
+.bar-track{flex:1;height:22px;background:#f0f0f0;border-radius:4px;position:relative;overflow:hidden}
+.bar-fill-split{height:100%;background:#3498db;position:absolute;left:0;top:0;border-radius:4px 0 0 4px}
+.bar-fill-merge{height:100%;background:#e74c3c;position:absolute;top:0;border-radius:0 4px 4px 0}
+.bar-val{width:30px;font-weight:700;color:#333}
+.bar-min{background:#fff8e1 !important}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+
+/* Responsive */
+@media(max-width:800px){
+  .sidebar{display:none}
+  .main{height:auto;flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="headerTitle">NC<sub>R</sub>(n) Min Degree Theorem — Interactive Learning</h1>
+  <div class="lang-sw">
+    <button data-lang="zh">中文</button>
+    <button class="active" data-lang="en">EN</button>
+  </div>
+</header>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="main">
+  <div class="sidebar">
+    <h3 id="sideTitle">Current Partition</h3>
+    <canvas id="sideCanvas" width="536" height="536"></canvas>
+    <div class="side-info" id="sideInfo"></div>
+  </div>
+  <div class="content">
+    <div class="viz-area" id="vizArea"></div>
+  </div>
+</div>
+
+<script>
+// ========== i18n ==========
+let lang = 'en';
+const L = {
+  zh: {
+    html_title: '最小度定理 — 交互式证明学习',
+    header_title: 'NC<sub>R</sub>(n) 最小度定理 — 交互式学习',
+    side_title: '当前分区',
+    side_default: '点击可视化中的元素来查看详情',
+    lbl_partition: '分区：',
+    lbl_groups: '组',
+    lbl_degree: '度',
+    lbl_splits: '分裂',
+    lbl_merges: '合并',
+    lbl_merge_result: '合并结果',
+    steps: [
+      '① 什么是非交叉分区',
+      '② 分裂与合并',
+      '③ 度 = 邻居数',
+      '④ 最小度是多少？',
+      '⑤ 数分裂',
+      '⑥ 数合并',
+      '⑦ 下界: n−1',
+      '⑧ 双链构造',
+      '⑨ 只有这n个',
+    ],
+    s0_title: '什么是非交叉分区？',
+    s0_p1: '把数字 1, 2, ..., n 放在圆上，然后分成几组。',
+    s0_p2: '规则：同一组的数字用线连起来，<b>不同组的线不能交叉</b>。',
+    s0_p3: '这就叫「非交叉分区」（noncrossing partition）。',
+    s0_try: '试一试：选择不同的 n，看看有多少种非交叉分区。点击圆上的分区来观察！',
+    s0_count: (n, c) => `n = ${n} 时，共有 <b>${c}</b> 种非交叉分区（= 第${n}个 Catalan 数）`,
+    s1_title: '分裂与合并：分区之间的关系',
+    s1_p1: '两个分区之间有「边」，当且仅当一个可以通过<b>合并两组</b>或<b>拆开一组</b>变成另一个。',
+    s1_p2: '比如 {1,2}{3}{4} 可以合并 {3} 和 {4} 变成 {1,2}{3,4}。',
+    s1_try: '试一试：选择一个分区，看看它能分裂和合并成什么。',
+    s1_split: '分裂（把一个大组拆成两个小组）',
+    s1_merge: '合并（把两个小组合成一个大组）',
+    s1_result: (s, m) => `这个分区有 <b>${s}</b> 种分裂、<b>${m}</b> 种合并方式`,
+    s2_title: '度 = 分裂数 + 合并数',
+    s2_p1: 'Step ② 告诉我们：分区的每个邻居要么来自<b>拆一组</b>（分裂），要么来自<b>合两组</b>（合并）。',
+    s2_p1b: '分裂把组数从 k 变成 k+1，合并把组数从 k 变成 k−1。方向相反，所以一个邻居不可能同时是分裂又是合并。',
+    s2_p1c: '因此：邻居 = 分裂结果 + 合并结果（没有重叠），<b>度 = 分裂数 + 合并数</b>。',
+    s2_example: '例子：{1,2}{3,4}（n=4, k=2 组）<ul style="margin:6px 0 0 16px"><li>分裂：{1,2}→{1}{2}、{3,4}→{3}{4}，共 <b>2</b> 种（k 变成 3）</li><li>合并：{1,2}+{3,4}→{1,2,3,4}，共 <b>1</b> 种（k 变成 1）</li></ul>度 = 2 + 1 = <b>3</b> = n−1',
+    s2_p2: '度越大，说明这个分区越「灵活」，越容易变成别的分区。',
+    s2_try: '试一试：调整 n，观察每个分区的度。哪个分区的度最小？',
+    s2_bar_split: '分裂',
+    s2_bar_merge: '合并',
+    s2_min_summary: (minDeg, count) => `最小度 = ${minDeg}, ${count} 个分区达到`,
+    s3_title: '问题：最小度是多少？',
+    s3_p1: '我们发现，不管 n 多大，总有一些分区的度特别小。',
+    s3_p2: '你觉得最小的度是多少？和 n 有什么关系？',
+    s3_reveal: '揭晓答案',
+    s3_answer: (n) => `答案：最小度 = <b>${n} − 1 = ${n-1}</b>，而且恰好有 <b>${n}</b> 个分区达到这个最小值！`,
+    s3_try: '观察下面的数据，试着找出规律。',
+    s3_col_catalan: 'Catalan 数',
+    s3_col_min: '最小度',
+    s3_col_count: '达到最小度的数量',
+    s4_title: '为什么分裂数 ≥ n − k？',
+    s4_step1: '第一步：看一个具体例子',
+    s4_example: '拿分区 {1,2,3}{4,5} 来说（k=2 组，大小分别是 3 和 2）：<ul style="margin:6px 0 0 16px"><li>组 {1,2,3}（大小 3）可以拆成：{1}{2,3}、{1,2}{3}、{1,3}{2}，共 <b>3</b> 种</li><li>组 {4,5}（大小 2）只能拆成：{4}{5}，共 <b>1</b> 种</li></ul>总分裂数 = 3 + 1 = <b>4</b>',
+    s4_step2: '第二步：一般规律',
+    s4_p2: '大小为 s 的组，拆法恰好是 <b>C(s,2) = s(s−1)/2</b> 种。',
+    s4_step3: '第三步：C(s,2) 和 s−1 的大小关系',
+    s4_ineq_explain: '把 C(s,2) 和 s−1 逐个对比：',
+    s4_ineq_conclusion: 's ≤ 2 时刚好相等，s ≥ 3 后 C(s,2) 远大于 s−1。<br>所以<b>每组的拆法数一定 ≥ s−1</b>，取等号当且仅当组的大小 ≤ 2。',
+    s4_step4: '第四步：为什么加起来等于 n − k？',
+    s4_sum_explain: '先看例子：{1,2,3}{4,5} 有 k=2 组，大小 s₁=3, s₂=2。<br>1,2,3,4,5 每个数恰好出现在一个组里 → 3 + 2 = 5 = n ✓<br><br>一般也一样：分区把 n 个元素不重不漏地分成 k 组，所以 <b>s₁ + s₂ + ... + sₖ = n</b>。<br><br>接下来每项减 1：<br><span class="formula">(s₁−1) + (s₂−1) + ... + (sₖ−1)</span><br>= <span class="formula">(s₁ + s₂ + ... + sₖ) − k</span>　← 提出 k 个 −1<br>= <span class="formula">n − k</span>',
+    s4_formula: '分裂总数 ≥ (s₁−1) + (s₂−1) + ... + (sₖ−1) = n − k',
+    s4_try: '用下面的交互验证：选一个分区，看每组的拆法数和下界。',
+    s4_block: '组',
+    s4_size: '大小',
+    s4_actual: 'C(s,2)',
+    s4_bound: '下界 (s−1)',
+    s4_tight: '紧？',
+    s4_total: (total, bound) => `总分裂: <b>${total}</b> ≥ n−k = <b>${bound}</b>`,
+    s4_equality: '等号成立！',
+    s4_col_s: 's（组大小）',
+    s4_col_cs2: 'C(s,2)',
+    s4_col_sm1: 's−1',
+    s4_col_rel: '大小关系',
+    s5_title: '为什么合并数 ≥ k − 1？',
+    s5_step1: '第一步：什么是「合并图」？',
+    s5_step1_explain: '把每组看作一个<b>点</b>。如果两组合并后仍然不交叉，就在它们之间连一条<b>线</b>。得到的图叫「合并图」。',
+    s5_step1_example: '比如 {1,3}{2}{4,5}（3 组）：<ul style="margin:6px 0 0 16px"><li>{1,3} 和 {2} 合并成 {1,2,3}，不交叉 → 连线</li><li>{2} 和 {4,5} 合并成 {2,4,5}，不交叉 → 连线</li><li>{1,3} 和 {4,5} 合并成 {1,3,4,5}，不交叉 → 连线</li></ul>3 个点、3 条线 → 这就是合并图。',
+    s5_step2: '第二步：为什么合并图一定连通？',
+    s5_step2_explain: '非交叉分区的组之间有自然的「嵌套」关系：<ul style="margin:6px 0 0 16px"><li>一组的范围被另一组完全包住 → <b>父子</b>，一定能合并</li><li>不被任何组包住的叫<b>根节点</b>，根节点之间也一定能合并</li></ul>沿着这些关系，任意两组之间都能找到路径 → 合并图<b>连通</b>。',
+    s5_step3: '第三步：连通 → 至少 k−1 条边',
+    s5_step3_explain: '想象 k 个孤立的岛屿，要全部连成一片，最少需要 k−1 座桥（像串糖葫芦一样一个接一个）。<br>合并图连通 → 至少有 k−1 条边 → <b>合并数 ≥ k−1</b>。',
+    s5_try: '试一试：选择一个分区，查看它的合并图。绿色=根节点，蓝色边=父子可合并。',
+    s5_connected: '连通！',
+    s5_edges: '条边',
+    s5_nodes: '个节点',
+    s5_legend_pc: '蓝=父子',
+    s5_legend_rr: '绿=根-根',
+    s6_title: '组合起来：度 ≥ n − 1',
+    s6_step1: '回顾两个结论',
+    s6_recap_splits: '分裂数 ≥ n − k',
+    s6_recap_merges: '合并数 ≥ k − 1',
+    s6_step2: '加起来',
+    s6_step2_explain: '度 = 分裂数 + 合并数，把两个下界代入：',
+    s6_sub_bounds: '代入两个下界',
+    s6_sub_expand: '去掉括号',
+    s6_sub_cancel: '−k 和 +k 抵消！',
+    s6_intuition: '不管 k 是多少，度至少是 n−1。<br>直觉：组越多 → 分裂少但合并多；组越少 → 合并少但分裂多。此消彼长，总和恒定。',
+    s6_highlight: '对所有非交叉分区 π，deg(π) ≥ n − 1',
+    s7_title: '哪些分区恰好达到 n−1？',
+    s7_p1: '「双链分区」：选一个分割点 s，左边 {1,...,s} 配对成链，右边 {s+1,...,n} 配对成链。',
+    s7_p2: '比如 n=6, s=3：左链 {1,3}{2}，右链 {4,6}{5} → 完整分区 {1,3}{2}{4,6}{5}',
+    s7_p3: '所有组大小 ≤ 2 → 分裂数 = n−k。（「紧」= 不等式取到等号，恰好达到下界，一点余量都没有）',
+    s7_p3b: '为什么合并图恰好是路径？有两种合并是<b>不允许</b>的：',
+    s7_case1_title: '同链不能跳',
+    s7_case1_text: '中间隔着的块会和合并结果交叉',
+    s7_case2_title: '跨链不能连',
+    s7_case2_text: '内层块跑到根的范围外，和根交叉',
+    s7_p3c: '所以只有相邻父子和两个根之间能合并 → 路径 → 合并数 = k−1（也是紧的！）。',
+    s7_try: '试一试：拖动分割点 s，看看不同的双链分区。验证度是否等于 n−1。',
+    s7_verified: '✓ 已验证：度 = n−1',
+    s7_split_point: '分割点 s',
+    s7_left_chain: '左链',
+    s7_right_chain: '右链',
+    s7_empty: '(空)',
+    s8_title: '只有这 n 个！',
+    s8_p1: '要让度恰好等于 n−1，需要分裂和合并<b>同时取到下界</b>。这意味着：',
+    s8_p2: '(a) 所有组大小 ≤ 2（否则分裂数 > n−k）',
+    s8_p3: '(b) 合并图必须恰好是树（否则合并数 > k−1）',
+    s8_p4: '满足这两个条件的分区，经过推导，恰好就是 n 个双链分区，不多不少。',
+    s8_try: '验证：下表列出所有「组大小≤2」的分区，看看哪些度=n−1。',
+    s8_partition: '分区',
+    s8_degree: '度',
+    s8_ismin: '最小度？',
+    s8_is_twochain: '双链？',
+    s8_conclusion: (n, count) => `共 ${count} 个达到最小度 = ${n-1}，恰好等于 n = ${n}。全部是双链分区！`,
+  },
+  en: {
+    html_title: 'Min Degree Theorem — Interactive Proof Learning',
+    header_title: 'NC<sub>R</sub>(n) Min Degree Theorem — Interactive Learning',
+    side_title: 'Current Partition',
+    side_default: 'Click elements in the visualization for details',
+    lbl_partition: 'Partition:',
+    lbl_groups: 'groups',
+    lbl_degree: 'deg',
+    lbl_splits: 'splits',
+    lbl_merges: 'merges',
+    lbl_merge_result: 'merge result',
+    steps: [
+      '① Noncrossing Partitions',
+      '② Splits & Merges',
+      '③ Degree = Neighbors',
+      '④ What\'s the Min Degree?',
+      '⑤ Counting Splits',
+      '⑥ Counting Merges',
+      '⑦ Lower Bound: n−1',
+      '⑧ Two-Chain Construction',
+      '⑨ Only These n',
+    ],
+    s0_title: 'What is a Noncrossing Partition?',
+    s0_p1: 'Place numbers 1, 2, ..., n on a circle, then group them.',
+    s0_p2: 'Rule: connect elements in the same group with lines. <b>Lines from different groups must not cross</b>.',
+    s0_p3: 'This is called a "noncrossing partition".',
+    s0_try: 'Try it: pick different n values and see how many noncrossing partitions exist. Click them!',
+    s0_count: (n, c) => `When n = ${n}, there are <b>${c}</b> noncrossing partitions (= Catalan number C<sub>${n}</sub>)`,
+    s1_title: 'Splits & Merges: Connections Between Partitions',
+    s1_p1: 'Two partitions share an edge if one becomes the other by <b>merging two groups</b> or <b>splitting one group</b>.',
+    s1_p2: 'E.g. {1,2}{3}{4} → merge {3} and {4} → {1,2}{3,4}.',
+    s1_try: 'Try it: select a partition to see its possible splits and merges.',
+    s1_split: 'Splits (break one group into two)',
+    s1_merge: 'Merges (combine two groups into one)',
+    s1_result: (s, m) => `This partition has <b>${s}</b> splits and <b>${m}</b> merges`,
+    s2_title: 'Degree = Splits + Merges',
+    s2_p1: 'From Step ②: every neighbor of a partition comes from either <b>splitting one group</b> or <b>merging two groups</b>.',
+    s2_p1b: 'Splitting changes group count from k to k+1; merging changes k to k−1. Opposite directions, so a neighbor can\'t be both.',
+    s2_p1c: 'Therefore: neighbors = split results + merge results (no overlap), so <b>degree = splits + merges</b>.',
+    s2_example: 'Example: {1,2}{3,4} (n=4, k=2 groups)<ul style="margin:6px 0 0 16px"><li>Splits: {1,2}→{1}{2}, {3,4}→{3}{4} — <b>2</b> ways (k becomes 3)</li><li>Merges: {1,2}+{3,4}→{1,2,3,4} — <b>1</b> way (k becomes 1)</li></ul>degree = 2 + 1 = <b>3</b> = n−1',
+    s2_p2: 'Higher degree means more "flexible" — easier to transform.',
+    s2_try: 'Try it: adjust n and observe each partition\'s degree. Which has the smallest?',
+    s2_bar_split: 'splits',
+    s2_bar_merge: 'merges',
+    s2_min_summary: (minDeg, count) => `min deg = ${minDeg}, ${count} partitions`,
+    s3_title: 'Question: What\'s the Minimum Degree?',
+    s3_p1: 'No matter how large n is, some partitions always have very small degrees.',
+    s3_p2: 'Can you guess the minimum degree? How does it relate to n?',
+    s3_reveal: 'Reveal Answer',
+    s3_answer: (n) => `Answer: min degree = <b>${n} − 1 = ${n-1}</b>, attained by exactly <b>${n}</b> partitions!`,
+    s3_try: 'Look at the data below and try to find the pattern.',
+    s3_col_catalan: 'Catalan',
+    s3_col_min: 'Min deg',
+    s3_col_count: '# at min',
+    s4_title: 'Why splits ≥ n − k?',
+    s4_step1: 'Step 1: A concrete example',
+    s4_example: 'Take partition {1,2,3}{4,5} (k=2 groups, sizes 3 and 2):<ul style="margin:6px 0 0 16px"><li>Group {1,2,3} (size 3) splits into: {1}{2,3}, {1,2}{3}, {1,3}{2} — <b>3</b> ways</li><li>Group {4,5} (size 2) splits into: {4}{5} — <b>1</b> way</li></ul>Total splits = 3 + 1 = <b>4</b>',
+    s4_step2: 'Step 2: The general pattern',
+    s4_p2: 'A group of size s can split in exactly <b>C(s,2) = s(s−1)/2</b> ways.',
+    s4_step3: 'Step 3: Comparing C(s,2) with s−1',
+    s4_ineq_explain: 'Let\'s compare C(s,2) and s−1 for small values:',
+    s4_ineq_conclusion: 'Equal when s ≤ 2, strictly greater when s ≥ 3.<br>So <b>each group\'s splits ≥ s−1</b>, with equality iff the group has size ≤ 2.',
+    s4_step4: 'Step 4: Why does the sum equal n−k?',
+    s4_sum_explain: 'Example: {1,2,3}{4,5} has k=2 groups, sizes s₁=3, s₂=2.<br>Each of 1,2,3,4,5 is in exactly one group → 3 + 2 = 5 = n ✓<br><br>In general: the partition puts n elements into k groups with no overlap, so <b>s₁ + s₂ + ... + sₖ = n</b>.<br><br>Now subtract 1 from each term:<br><span class="formula">(s₁−1) + (s₂−1) + ... + (sₖ−1)</span><br>= <span class="formula">(s₁ + s₂ + ... + sₖ) − k</span>　← factor out k copies of −1<br>= <span class="formula">n − k</span>',
+    s4_formula: 'total splits ≥ (s₁−1) + (s₂−1) + ... + (sₖ−1) = n − k',
+    s4_try: 'Verify below: pick a partition and check each group\'s splits vs. bound.',
+    s4_block: 'Group',
+    s4_size: 'Size',
+    s4_actual: 'C(s,2)',
+    s4_bound: 'Bound (s−1)',
+    s4_tight: 'Tight?',
+    s4_total: (total, bound) => `Total splits: <b>${total}</b> ≥ n−k = <b>${bound}</b>`,
+    s4_equality: 'Equality!',
+    s4_col_s: 's (group size)',
+    s4_col_cs2: 'C(s,2)',
+    s4_col_sm1: 's−1',
+    s4_col_rel: 'Relation',
+    s5_title: 'Why merges ≥ k − 1?',
+    s5_step1: 'Step 1: What is a "merge graph"?',
+    s5_step1_explain: 'Treat each group as a <b>dot</b>. If two groups can merge without creating a crossing, draw a <b>line</b> between them. The result is the "merge graph".',
+    s5_step1_example: 'Example: {1,3}{2}{4,5} (3 groups):<ul style="margin:6px 0 0 16px"><li>{1,3} and {2} merge into {1,2,3}, no crossing → draw line</li><li>{2} and {4,5} merge into {2,4,5}, no crossing → draw line</li><li>{1,3} and {4,5} merge into {1,3,4,5}, no crossing → draw line</li></ul>3 dots, 3 lines → this is the merge graph.',
+    s5_step2: 'Step 2: Why is the merge graph always connected?',
+    s5_step2_explain: 'Groups in a noncrossing partition have a natural "nesting" structure:<ul style="margin:6px 0 0 16px"><li>One group\'s span contained inside another → <b>parent-child</b>, always mergeable</li><li>Groups not contained in any other → <b>root nodes</b>, also always mergeable with each other</li></ul>Following these relationships, any two groups can reach each other → the merge graph is <b>connected</b>.',
+    s5_step3: 'Step 3: Connected → at least k−1 edges',
+    s5_step3_explain: 'Imagine k isolated islands. To connect them all, you need at least k−1 bridges (like stringing beads one after another).<br>Merge graph is connected → at least k−1 edges → <b>merges ≥ k−1</b>.',
+    s5_try: 'Try it: select a partition to see its merge graph. Green = root nodes, blue edges = parent-child.',
+    s5_connected: 'Connected!',
+    s5_edges: 'edges',
+    s5_nodes: 'nodes',
+    s5_legend_pc: 'blue=parent-child',
+    s5_legend_rr: 'green=root-root',
+    s6_title: 'Combining: degree ≥ n − 1',
+    s6_step1: 'Recall our two results',
+    s6_recap_splits: 'splits ≥ n − k',
+    s6_recap_merges: 'merges ≥ k − 1',
+    s6_step2: 'Add them up',
+    s6_step2_explain: 'degree = splits + merges, substitute both lower bounds:',
+    s6_sub_bounds: 'substitute both bounds',
+    s6_sub_expand: 'remove parentheses',
+    s6_sub_cancel: '−k and +k cancel!',
+    s6_intuition: 'No matter what k is, degree ≥ n−1.<br>Intuition: more groups → fewer splits but more merges; fewer groups → fewer merges but more splits. They balance out.',
+    s6_highlight: 'For all noncrossing partitions π, deg(π) ≥ n − 1',
+    s7_title: 'Which partitions achieve exactly n−1?',
+    s7_p1: '"Two-chain partition": pick a split point s, pair {1,...,s} into a chain, pair {s+1,...,n} into a chain.',
+    s7_p2: 'E.g. n=6, s=3: left chain {1,3}{2}, right chain {4,6}{5} → full partition {1,3}{2}{4,6}{5}',
+    s7_p3: 'All groups size ≤ 2 → splits = n−k. ("Tight" = inequality becomes equality, the bound is hit exactly, no slack at all)',
+    s7_p3b: 'Why is the merge graph exactly a path? Two merges are <b>forbidden</b>:',
+    s7_case1_title: 'No skipping in a chain',
+    s7_case1_text: 'The intermediate block crosses the merged result',
+    s7_case2_title: 'No cross-chain merges',
+    s7_case2_text: 'Inner block escapes the root\'s span, crossing the root',
+    s7_p3c: 'Only adjacent parent-child and two roots can merge → path → merges = k−1 (also tight!).',
+    s7_try: 'Try it: drag the split point s to see different two-chain partitions. Verify degree = n−1.',
+    s7_verified: '✓ Verified: degree = n−1',
+    s7_split_point: 'Split point s',
+    s7_left_chain: 'Left chain',
+    s7_right_chain: 'Right chain',
+    s7_empty: '(empty)',
+    s8_title: 'Only These n!',
+    s8_p1: 'For degree to equal exactly n−1, both splits and merges must <b>simultaneously hit their bounds</b>:',
+    s8_p2: '(a) All groups size ≤ 2 (otherwise splits > n−k)',
+    s8_p3: '(b) Merge graph must be exactly a tree (otherwise merges > k−1)',
+    s8_p4: 'The only partitions satisfying both conditions are exactly the n two-chain partitions.',
+    s8_try: 'Verify: the table below lists all "groups ≤ 2" partitions. Check which have degree = n−1.',
+    s8_partition: 'Partition',
+    s8_degree: 'Degree',
+    s8_ismin: 'Min deg?',
+    s8_is_twochain: 'Two-chain?',
+    s8_conclusion: (n, count) => `${count} partitions achieve min degree = ${n-1}, exactly n = ${n}. All are two-chain!`,
+  }
+};
+function T(k) { return L[lang][k] || L['zh'][k] || k; }
+
+// ========== Math Core ==========
+function isNoncrossing(blocks) {
+  for (let i = 0; i < blocks.length; i++)
+    for (let j = i + 1; j < blocks.length; j++) {
+      const A = blocks[i], B = blocks[j];
+      for (const a of A) for (const c of A) if (c > a)
+        for (const b of B) for (const d of B) if (d > b)
+          if ((a < b && b < c && c < d) || (b < a && a < d && d < c)) return false;
+    }
+  return true;
+}
+
+function generateNC(n) {
+  const results = [];
+  function bt(pos, blocks) {
+    if (pos > n) { results.push(blocks.map(b => [...b])); return; }
+    for (let i = 0; i < blocks.length; i++) {
+      blocks[i].push(pos);
+      if (isNoncrossing(blocks)) bt(pos + 1, blocks);
+      blocks[i].pop();
+    }
+    blocks.push([pos]); bt(pos + 1, blocks); blocks.pop();
+  }
+  bt(1, []);
+  return results.map(p => p.map(b => b.sort((x,y)=>x-y)).sort((x,y)=>x[0]-y[0]));
+}
+
+const ncCache = {};
+function getNC(n) { return ncCache[n] || (ncCache[n] = generateNC(n)); }
+
+function pStr(p) { return p.map(b => '{' + b.join(',') + '}').join(' '); }
+
+function canMergeBlocks(blocks, i, j) {
+  const merged = [...blocks[i], ...blocks[j]].sort((x,y)=>x-y);
+  const rest = blocks.filter((_,idx) => idx!==i && idx!==j);
+  return isNoncrossing([merged, ...rest]);
+}
+
+function getSplits(partition) {
+  const results = [];
+  for (let bi = 0; bi < partition.length; bi++) {
+    const block = partition[bi];
+    if (block.length < 2) continue;
+    const s = block.length;
+    for (let mask = 1; mask < (1 << s) - 1; mask++) {
+      const a = [], b = [];
+      for (let i = 0; i < s; i++) { if (mask & (1<<i)) a.push(block[i]); else b.push(block[i]); }
+      if (a.length === 0 || b.length === 0) continue;
+      const newPart = [...partition.slice(0, bi), a, b, ...partition.slice(bi+1)];
+      if (isNoncrossing(newPart)) {
+        const key = pStr(newPart.map(x=>[...x].sort((u,v)=>u-v)).sort((u,v)=>u[0]-v[0]));
+        if (!results.find(r => r.key === key)) {
+          results.push({ key, from: bi, partA: a, partB: b,
+            result: newPart.map(x=>[...x].sort((u,v)=>u-v)).sort((u,v)=>u[0]-v[0]) });
+        }
+      }
+    }
+  }
+  return results;
+}
+
+function getMerges(partition) {
+  const results = [];
+  for (let i = 0; i < partition.length; i++)
+    for (let j = i+1; j < partition.length; j++)
+      if (canMergeBlocks(partition, i, j))
+        results.push({ i, j, blockA: partition[i], blockB: partition[j] });
+  return results;
+}
+
+function twoChain(n, s) {
+  function chain(a, b) {
+    const blocks = [];
+    let lo = a, hi = b;
+    while (lo < hi) { blocks.push([lo, hi]); lo++; hi--; }
+    if (lo === hi) blocks.push([lo]);
+    return blocks;
+  }
+  const blocks = [];
+  if (s > 0) blocks.push(...chain(1, s));
+  if (s < n) blocks.push(...chain(s+1, n));
+  return blocks.sort((x,y) => x[0] - y[0]);
+}
+
+function isTwoChain(partition, n) {
+  for (let s = 0; s < n; s++) {
+    if (pStr(twoChain(n, s)) === pStr(partition)) return s;
+  }
+  return -1;
+}
+
+// ========== Degree cache ==========
+const degCache = {};
+function getDegreeData(n) {
+  if (degCache[n]) return degCache[n];
+  const parts = getNC(n);
+  const data = parts.map(p => {
+    const s = getSplits(p).length, m = getMerges(p).length;
+    return { p, splits: s, merges: m, deg: s + m };
+  });
+  degCache[n] = data;
+  return data;
+}
+
+// ========== Drawing ==========
+const COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e','#e84393','#00cec9'];
+
+function drawPartition(canvas, partition, n, opts = {}) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = Math.min(W,H) * 0.36;
+  ctx.clearRect(0, 0, W, H);
+
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + 2*Math.PI*i/n;
+    pts.push({ x: cx + R*Math.cos(angle), y: cy + R*Math.sin(angle) });
+  }
+
+  ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI); ctx.stroke();
+
+  partition.forEach((block, bi) => {
+    const col = COLORS[bi % COLORS.length];
+    ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.45;
+    if (block.length >= 2) {
+      for (let i = 0; i < block.length; i++)
+        for (let j = i+1; j < block.length; j++) {
+          const a = pts[block[i]-1], b = pts[block[j]-1];
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+    }
+    if (block.length >= 3) {
+      ctx.fillStyle = col; ctx.globalAlpha = 0.08;
+      ctx.beginPath(); ctx.moveTo(pts[block[0]-1].x, pts[block[0]-1].y);
+      for (let i = 1; i < block.length; i++) ctx.lineTo(pts[block[i]-1].x, pts[block[i]-1].y);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  });
+
+  partition.forEach((block, bi) => {
+    const col = COLORS[bi % COLORS.length];
+    block.forEach(elem => {
+      const p = pts[elem-1];
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 12, 0, 2*Math.PI); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(elem, p.x, p.y);
+    });
+  });
+
+  if (opts.label) {
+    ctx.fillStyle = '#888'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(opts.label, cx, H - 8);
+  }
+}
+
+function showSidePartition(partition, n, info) {
+  drawPartition(document.getElementById('sideCanvas'), partition, n, { label: pStr(partition) });
+  if (info) document.getElementById('sideInfo').innerHTML = info;
+}
+
+function resetSideInfo() {
+  document.getElementById('sideInfo').innerHTML = T('side_default');
+}
+
+// ========== Steps ==========
+let currentStep = 0;
+let currentN = 5;
+
+function buildProgress() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = T('steps').map((s, i) =>
+    `<div class="step-dot${i===currentStep?' active':''}" data-step="${i}">${s}</div>`
+  ).join('');
+  bar.querySelectorAll('.step-dot').forEach(d =>
+    d.addEventListener('click', () => goStep(+d.dataset.step))
+  );
+}
+
+function goStep(i) {
+  currentStep = i;
+  buildProgress();
+  resetSideInfo();
+  const renders = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6, renderStep7, renderStep8];
+  renders[i]();
+}
+
+function nSelector(selected, onChange) {
+  let html = '<div class="n-btns">';
+  for (const v of [3,4,5,6,7]) {
+    html += `<button class="n-btn${v===selected?' active':''}" data-n="${v}">${v}</button>`;
+  }
+  html += '</div>';
+  setTimeout(() => {
+    document.querySelectorAll('.viz-area .n-btn[data-n]').forEach(b =>
+      b.addEventListener('click', () => { onChange(+b.dataset.n); })
+    );
+  }, 0);
+  return html;
+}
+
+function partSelect(n, selId, onChange) {
+  const parts = getNC(n);
+  let html = `<select id="${selId}" style="max-width:300px;padding:6px;border:1px solid #ddd;border-radius:6px;font-family:monospace;font-size:12px">`;
+  parts.forEach((p, i) => { html += `<option value="${i}">${pStr(p)}</option>`; });
+  html += '</select>';
+  setTimeout(() => {
+    const sel = document.getElementById(selId);
+    if (sel) sel.addEventListener('change', () => onChange(+sel.value));
+  }, 0);
+  return html;
+}
+
+// ---- Step 0: What is NC ----
+function renderStep0() {
+  const parts = getNC(currentN);
+  const viz = document.getElementById('vizArea');
+
+  viz.innerHTML = `<div class="card fade-in">
+    <h2>${T('s0_title')}</h2>
+    <p>${T('s0_p1')}</p>
+    <p>${T('s0_p2')}</p>
+    <p>${T('s0_p3')}</p>
+    <div class="ctrl"><label>n =</label>${nSelector(currentN, n => { currentN = n; renderStep0(); })}</div>
+    <p>${T('s0_count')(currentN, parts.length)}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px" id="partGrid"></div>
+    <div class="try-it"><b>💡</b> ${T('s0_try')}</div>
+  </div>`;
+
+  const grid = document.getElementById('partGrid');
+  parts.forEach((p, i) => {
+    const c = document.createElement('canvas');
+    c.width = 120; c.height = 120;
+    c.style.cssText = 'border:1px solid #eee;border-radius:8px;cursor:pointer;background:#fafafa;transition:box-shadow .2s';
+    c.addEventListener('mouseenter', () => c.style.boxShadow = '0 2px 8px rgba(0,0,0,.15)');
+    c.addEventListener('mouseleave', () => c.style.boxShadow = 'none');
+    c.addEventListener('click', () => {
+      const splits = getSplits(p);
+      const merges = getMerges(p);
+      showSidePartition(p, currentN,
+        `<div><b>${pStr(p)}</b></div>` +
+        `<div>${p.length} ${T('lbl_groups')}, ${T('lbl_degree')} = ${splits.length + merges.length}</div>`
+      );
+    });
+    grid.appendChild(c);
+    drawPartition(c, p, currentN);
+  });
+}
+
+// ---- Step 1: Split & Merge ----
+function renderStep1() {
+  const parts = getNC(currentN);
+  const viz = document.getElementById('vizArea');
+
+  viz.innerHTML = `<div class="card fade-in">
+    <h2>${T('s1_title')}</h2>
+    <p>${T('s1_p1')}</p>
+    <p>${T('s1_p2')}</p>
+    <div class="ctrl"><label>n =</label>${nSelector(currentN, n => { currentN = n; renderStep1(); })}
+    <label style="margin-left:12px">${T('lbl_partition')}</label>${partSelect(currentN, 'selP1', showSplitMerge)}</div>
+    <div id="splitMergeArea"></div>
+    <div class="try-it"><b>💡</b> ${T('s1_try')}</div>
+  </div>`;
+
+  showSplitMerge(0);
+
+  function showSplitMerge(idx) {
+    const p = parts[idx];
+    const splits = getSplits(p);
+    const merges = getMerges(p);
+    showSidePartition(p, currentN, `<b>${pStr(p)}</b><br>${p.length} ${T('lbl_groups')}`);
+
+    let html = `<p style="margin:12px 0">${T('s1_result')(splits.length, merges.length)}</p>`;
+    html += `<div style="display:flex;gap:20px;flex-wrap:wrap">`;
+    html += `<div><b style="color:#3498db">↗ ${T('s1_split')} (${splits.length})</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">`;
+    splits.forEach(s => {
+      html += `<div style="background:#f0f4ff;padding:4px 8px;border-radius:6px;font-family:monospace;font-size:11px;cursor:pointer" class="sm-split" data-result="${encodeURIComponent(JSON.stringify(s.result))}">${s.key.replace(/\|/g,' ')}</div>`;
+    });
+    html += '</div></div>';
+    html += `<div><b style="color:#e74c3c">↘ ${T('s1_merge')} (${merges.length})</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">`;
+    merges.forEach(m => {
+      const merged = [...m.blockA, ...m.blockB].sort((x,y)=>x-y);
+      const newPart = [...p.filter((_,idx2) => idx2 !== m.i && idx2 !== m.j), merged].sort((x,y)=>x[0]-y[0]);
+      html += `<div style="background:#fde8e8;padding:4px 8px;border-radius:6px;font-family:monospace;font-size:11px;cursor:pointer" class="sm-merge" data-result="${encodeURIComponent(JSON.stringify(newPart))}">{${m.blockA}}+{${m.blockB}}</div>`;
+    });
+    html += '</div></div></div>';
+    document.getElementById('splitMergeArea').innerHTML = html;
+
+    // Split click: show resulting partition
+    document.querySelectorAll('.sm-split').forEach(el => {
+      el.addEventListener('click', () => {
+        try {
+          const p2 = JSON.parse(decodeURIComponent(el.dataset.result));
+          if (p2) showSidePartition(p2, currentN, `<b>${pStr(p2)}</b><br>${T('lbl_splits')}`);
+        } catch(e) { console.warn('split click error', e); }
+      });
+    });
+    // Merge click: show resulting partition
+    document.querySelectorAll('.sm-merge').forEach(el => {
+      el.addEventListener('click', () => {
+        try {
+          const p2 = JSON.parse(decodeURIComponent(el.dataset.result));
+          if (p2) showSidePartition(p2, currentN, `<b>${pStr(p2)}</b><br>${T('lbl_merge_result')}`);
+        } catch(e) { console.warn('merge click error', e); }
+      });
+    });
+  }
+}
+
+// ---- Step 2: Degree ----
+function renderStep2() {
+  const data = [...getDegreeData(currentN)].sort((a,b) => a.deg - b.deg);
+  const viz = document.getElementById('vizArea');
+
+  const maxDeg = Math.max(...data.map(d => d.deg));
+  const minDeg = data[0].deg;
+
+  let bars = '';
+  data.forEach(d => {
+    const sw = d.splits / maxDeg * 100;
+    const mw = d.merges / maxDeg * 100;
+    const isMin = d.deg === minDeg;
+    bars += `<div class="bar-row${isMin ? ' bar-min' : ''}" style="cursor:pointer" data-p="${encodeURIComponent(JSON.stringify(d.p))}">
+      <div class="bar-label">${pStr(d.p)}</div>
+      <div class="bar-track">
+        <div class="bar-fill-split" style="width:${sw}%"></div>
+        <div class="bar-fill-merge" style="left:${sw}%;width:${mw}%"></div>
+      </div>
+      <div class="bar-val">${d.deg}</div>
+    </div>`;
+  });
+
+  viz.innerHTML = `<div class="card fade-in" style="max-height:100%;overflow-y:auto">
+    <h2>${T('s2_title')}</h2>
+    <p>${T('s2_p1')}</p>
+    <p>${T('s2_p1b')}</p>
+    <p>${T('s2_p1c')}</p>
+    <div class="highlight" style="background:#f0f4ff;border-left:3px solid #3498db">${T('s2_example')}</div>
+    <p>${T('s2_p2')}</p>
+    <div class="ctrl"><label>n =</label>${nSelector(currentN, n => { currentN = n; renderStep2(); })}</div>
+    <div style="display:flex;gap:12px;margin:8px 0;font-size:12px">
+      <span><span style="display:inline-block;width:12px;height:12px;background:#3498db;border-radius:2px;vertical-align:middle"></span> ${T('s2_bar_split')}</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:#e74c3c;border-radius:2px;vertical-align:middle"></span> ${T('s2_bar_merge')}</span>
+      <span style="color:#999">| ${T('s2_min_summary')(minDeg, data.filter(d=>d.deg===minDeg).length)}</span>
+    </div>
+    ${bars}
+    <div class="try-it"><b>💡</b> ${T('s2_try')}</div>
+  </div>`;
+
+  document.querySelectorAll('.bar-row').forEach(row => {
+    row.addEventListener('click', () => {
+      try {
+        const p = JSON.parse(decodeURIComponent(row.dataset.p));
+        const s = getSplits(p).length, m = getMerges(p).length;
+        showSidePartition(p, currentN, `<b>${pStr(p)}</b><br>${p.length} ${T('lbl_groups')}<br>${T('lbl_splits')}: ${s}, ${T('lbl_merges')}: ${m}<br>${T('lbl_degree')} = ${s+m}`);
+      } catch(e) { console.warn('bar click error', e); }
+    });
+  });
+}
+
+// ---- Step 3: Min degree question ----
+function renderStep3() {
+  const viz = document.getElementById('vizArea');
+  let table = `<table class="data-table"><tr><th>n</th><th>${T('s3_col_catalan')}</th><th>${T('s3_col_min')}</th><th>${T('s3_col_count')}</th></tr>`;
+  for (let n = 2; n <= 7; n++) {
+    const data = getDegreeData(n);
+    const minD = Math.min(...data.map(d => d.deg));
+    const minCount = data.filter(d => d.deg === minD).length;
+    table += `<tr><td>${n}</td><td>${data.length}</td><td><b>${minD}</b></td><td><b>${minCount}</b></td></tr>`;
+  }
+  table += '</table>';
+
+  viz.innerHTML = `<div class="card fade-in">
+    <h2>${T('s3_title')}</h2>
+    <p>${T('s3_p1')}</p>
+    <p>${T('s3_p2')}</p>
+    ${table}
+    <div class="highlight" id="answerBox" style="display:none"></div>
+    <div class="ctrl"><button id="revealBtn">${T('s3_reveal')}</button></div>
+    <div class="try-it"><b>💡</b> ${T('s3_try')}</div>
+  </div>`;
+
+  document.getElementById('revealBtn').addEventListener('click', () => {
+    document.getElementById('answerBox').style.display = 'block';
+    document.getElementById('answerBox').innerHTML = T('s3_answer')(currentN);
+    document.getElementById('revealBtn').style.display = 'none';
+  });
+}
+
+// ---- Step 4: Counting splits ----
+function renderStep4() {
+  const parts = getNC(currentN);
+  const viz = document.getElementById('vizArea');
+
+  // Build comparison table: C(s,2) vs s-1 for s=1..5
+  let ineqRows = '';
+  for (let s = 1; s <= 5; s++) {
+    const cs2 = s*(s-1)/2, sm1 = s-1, eq = cs2 === sm1;
+    ineqRows += `<tr><td>${s}</td><td>${cs2}</td><td>${sm1}</td><td style="font-weight:600;color:${eq?'#27ae60':'#e74c3c'}">${cs2} ${eq?'=':'>'} ${sm1}</td></tr>`;
+  }
+
+  viz.innerHTML = `<div class="card fade-in" style="max-height:100%;overflow-y:auto">
+    <h2>${T('s4_title')}</h2>
+    <h3 style="color:#3498db;font-size:14px;margin:14px 0 6px">${T('s4_step1')}</h3>
+    <div class="highlight" style="background:#f0f4ff;border-left:3px solid #3498db">${T('s4_example')}</div>
+    <h3 style="color:#3498db;font-size:14px;margin:14px 0 6px">${T('s4_step2')}</h3>
+    <p>${T('s4_p2')}</p>
+    <h3 style="color:#3498db;font-size:14px;margin:14px 0 6px">${T('s4_step3')}</h3>
+    <p>${T('s4_ineq_explain')}</p>
+    <table class="data-table" style="font-size:13px"><tr><th>${T('s4_col_s')}</th><th>${T('s4_col_cs2')}</th><th>${T('s4_col_sm1')}</th><th>${T('s4_col_rel')}</th></tr>${ineqRows}</table>
+    <p>${T('s4_ineq_conclusion')}</p>
+    <h3 style="color:#3498db;font-size:14px;margin:14px 0 6px">${T('s4_step4')}</h3>
+    <p>${T('s4_sum_explain')}</p>
+    <div class="highlight"><span class="formula">${T('s4_formula')}</span></div>
+    <div class="ctrl"><label>n =</label>${nSelector(currentN, n => { currentN = n; renderStep4(); })}
+    <label style="margin-left:12px">${T('lbl_partition')}</label>${partSelect(currentN, 'selP4', showSplitDetail)}</div>
+    <div id="splitDetailArea"></div>
+    <div class="try-it"><b>💡</b> ${T('s4_try')}</div>
+  </div>`;
+
+  showSplitDetail(0);
+
+  function showSplitDetail(idx) {
+    const p = parts[idx];
+    showSidePartition(p, currentN, `<b>${pStr(p)}</b><br>${p.length} ${T('lbl_groups')}`);
+    const splits = getSplits(p);
+    const k = p.length;
+    let html = `<table class="data-table"><tr><th>${T('s4_block')}</th><th>${T('s4_size')}</th><th>${T('s4_actual')}</th><th>${T('s4_bound')}</th><th>${T('s4_tight')}</th></tr>`;
+    p.forEach((block, bi) => {
+      const s = block.length;
+      const cs2 = s*(s-1)/2;
+      const bound = s - 1;
+      const tight = cs2 === bound;
+      html += `<tr><td style="font-family:monospace">{${block.join(',')}}</td><td>${s}</td><td style="color:#3498db;font-weight:600">${cs2}</td><td>${bound}</td><td>${tight ? '✓ =':'> '+(cs2-bound)}</td></tr>`;
+    });
+    html += '</table>';
+    html += `<p style="margin-top:8px">${T('s4_total')(splits.length, currentN-k)}
+    ${p.every(b=>b.length<=2) ? `<span style="color:#27ae60;font-weight:600"> ← ${T('s4_equality')}</span>` : ''}</p>`;
+    document.getElementById('splitDetailArea').innerHTML = html;
+  }
+}
+
+// ---- Step 5: Counting merges (merge graph) ----
+function renderStep5() {
+  const parts = getNC(currentN);
+  const viz = document.getElementById('vizArea');
+
+  viz.innerHTML = `<div class="card fade-in" style="max-height:100%;overflow-y:auto">
+    <h2>${T('s5_title')}</h2>
+    <h3 style="color:#e74c3c;font-size:14px;margin:14px 0 6px">${T('s5_step1')}</h3>
+    <p>${T('s5_step1_explain')}</p>
+    <div class="highlight" style="background:#fef0f0;border-left:3px solid #e74c3c">${T('s5_step1_example')}</div>
+    <h3 style="color:#e74c3c;font-size:14px;margin:14px 0 6px">${T('s5_step2')}</h3>
+    <p>${T('s5_step2_explain')}</p>
+    <h3 style="color:#e74c3c;font-size:14px;margin:14px 0 6px">${T('s5_step3')}</h3>
+    <p>${T('s5_step3_explain')}</p>
+    <div class="ctrl"><label>n =</label>${nSelector(currentN, n => { currentN = n; renderStep5(); })}
+    <label style="margin-left:12px">${T('lbl_partition')}</label>${partSelect(currentN, 'selP5', showMergeGraph)}</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+      <canvas id="mergePartCanvas" width="280" height="280" style="border:1px solid #eee;border-radius:10px;background:#fafafa"></canvas>
+      <canvas id="mergeGraphCanvas" width="320" height="280" style="border:1px solid #eee;border-radius:10px;background:#fafafa"></canvas>
+    </div>
+    <div id="mergeDetail" style="margin-top:8px"></div>
+    <div class="try-it"><b>💡</b> ${T('s5_try')}</div>
+  </div>`;
+
+  showMergeGraph(0);
+
+  function showMergeGraph(idx) {
+    const p = parts[idx];
+    showSidePartition(p, currentN, `<b>${pStr(p)}</b><br>${p.length} ${T('lbl_groups')}`);
+    drawPartition(document.getElementById('mergePartCanvas'), p, currentN, { label: pStr(p) });
+
+    const merges = getMerges(p);
+    const k = p.length;
+
+    // Nesting forest
+    const spans = p.map(b => [Math.min(...b), Math.max(...b)]);
+    const parent = new Array(k).fill(-1);
+    for (let i = 0; i < k; i++) {
+      let best = -1, bestW = Infinity;
+      for (let j = 0; j < k; j++) {
+        if (i === j) continue;
+        const w = spans[j][1] - spans[j][0];
+        if (spans[j][0] <= spans[i][0] && spans[i][1] <= spans[j][1] && w < bestW &&
+            (spans[j][0] < spans[i][0] || spans[j][1] > spans[i][1])) {
+          best = j; bestW = w;
+        }
+      }
+      parent[i] = best;
+    }
+    const roots = [];
+    for (let i = 0; i < k; i++) if (parent[i] === -1) roots.push(i);
+
+    // Draw merge graph
+    const ctx = document.getElementById('mergeGraphCanvas').getContext('2d');
+    const W = 320, H = 280;
+    ctx.clearRect(0, 0, W, H);
+    const cx = W/2, cy = H/2 - 10, R = 90;
+    const bpos = [];
+    for (let i = 0; i < k; i++) {
+      const angle = -Math.PI/2 + (k > 1 ? i*2*Math.PI/k : 0);
+      bpos.push({ x: cx + R*Math.cos(angle), y: cy + R*Math.sin(angle) });
+    }
+
+    merges.forEach(m => {
+      const isPC = parent[m.i] === m.j || parent[m.j] === m.i;
+      const isRR = roots.includes(m.i) && roots.includes(m.j);
+      ctx.strokeStyle = isPC ? '#3498db' : isRR ? '#2ecc71' : '#f39c12';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(bpos[m.i].x, bpos[m.i].y); ctx.lineTo(bpos[m.j].x, bpos[m.j].y); ctx.stroke();
+    });
+
+    for (let i = 0; i < k; i++) {
+      const isRoot = roots.includes(i);
+      ctx.fillStyle = isRoot ? '#2ecc71' : COLORS[i % COLORS.length];
+      ctx.beginPath(); ctx.arc(bpos[i].x, bpos[i].y, 18, 0, 2*Math.PI); ctx.fill();
+      ctx.strokeStyle = isRoot ? '#1a9e4a' : '#fff'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('{'+p[i].join(',')+'}', bpos[i].x, bpos[i].y);
+    }
+
+    ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = '#3498db'; ctx.fillText(T('s5_legend_pc'), cx-70, H-12);
+    ctx.fillStyle = '#2ecc71'; ctx.fillText(T('s5_legend_rr'), cx+70, H-12);
+
+    document.getElementById('mergeDetail').innerHTML =
+      `<p>${k} ${T('s5_nodes')}, ${merges.length} ${T('s5_edges')} ≥ k−1 = ${k-1}
+      <span style="color:#27ae60;font-weight:600"> ← ${T('s5_connected')}</span></p>`;
+  }
+}
+
+// ---- Step 6: Lower bound ----
+function renderStep6() {
+  const viz = document.getElementById('vizArea');
+
+  viz.innerHTML = `<div class="card fade-in">
+    <h2>${T('s6_title')}</h2>
+    <h3 style="color:#8e44ad;font-size:14px;margin:14px 0 6px">${T('s6_step1')}</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0">
+      <div style="flex:1;min-width:200px;background:#f0f4ff;border-left:3px solid #3498db;padding:10px 14px;border-radius:0 8px 8px 0">
+        <b style="color:#3498db">Step ⑤</b>　${T('s6_recap_splits')}
+      </div>
+      <div style="flex:1;min-width:200px;background:#fef0f0;border-left:3px solid #e74c3c;padding:10px 14px;border-radius:0 8px 8px 0">
+        <b style="color:#e74c3c">Step ⑥</b>　${T('s6_recap_merges')}
+      </div>
+    </div>
+    <h3 style="color:#8e44ad;font-size:14px;margin:14px 0 6px">${T('s6_step2')}</h3>
+    <p>${T('s6_step2_explain')}</p>
+    <div style="margin-top:16px;background:#f8f8f8;border-radius:10px;padding:20px;text-align:center">
+      <div style="font-size:18px;font-family:'Courier New',monospace">
+        deg(π) = <span style="color:#3498db">${T('lbl_splits')}</span> + <span style="color:#e74c3c">${T('lbl_merges')}</span>
+      </div>
+      <div style="font-size:18px;font-family:'Courier New',monospace;margin-top:8px">
+        ≥ <span style="color:#3498db">(n − k)</span> + <span style="color:#e74c3c">(k − 1)</span>
+        <span style="font-size:13px;color:#999;margin-left:12px">← ${T('s6_sub_bounds')}</span>
+      </div>
+      <div style="font-size:18px;font-family:'Courier New',monospace;margin-top:8px">
+        = n − k + k − 1
+        <span style="font-size:13px;color:#999;margin-left:12px">← ${T('s6_sub_expand')}</span>
+      </div>
+      <div style="font-size:24px;font-family:'Courier New',monospace;margin-top:8px;color:#1a1a2e;font-weight:bold">
+        = n − 1
+        <span style="font-size:13px;color:#999;font-weight:normal;margin-left:12px">← ${T('s6_sub_cancel')}</span>
+      </div>
+    </div>
+    <p style="margin-top:12px">${T('s6_intuition')}</p>
+    <div class="highlight" style="font-size:16px;text-align:center;padding:16px">
+      <b>${T('s6_highlight')}</b>
+    </div>
+  </div>`;
+}
+
+// ---- Crossing diagram helper ----
+// bgArcs: [[a,b], ...] light background arcs showing chain structure
+// arcRed/arcBlue: witness pair from merged/victim block
+// splitAt: optional element index — draw a dashed vertical line after this element
+function drawCrossingDiagram(canvasId, n, bgArcs, arcRed, arcBlue, labelRed, labelBlue, splitAt) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const margin = 30, baseY = H - 26;
+  const gap = (W - 2*margin) / (n - 1);
+  const xOf = i => margin + (i-1) * gap;
+
+  // baseline
+  ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(margin-8, baseY); ctx.lineTo(W-margin+8, baseY); ctx.stroke();
+
+  // split line (chain boundary)
+  if (splitAt) {
+    const sx = (xOf(splitAt) + xOf(splitAt+1)) / 2;
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(sx, 20); ctx.lineTo(sx, baseY + 10); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#aaa'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(lang==='zh'?'左链':'L', sx - 14, baseY + 16);
+    ctx.fillText(lang==='zh'?'右链':'R', sx + 14, baseY + 16);
+  }
+
+  // background arcs (chain structure, light)
+  const BG_COLS = ['#bbdefb','#c8e6c9','#ffe0b2','#e1bee7','#b2dfdb'];
+  bgArcs.forEach((arc, i) => {
+    if (arc.length < 2) return;
+    const x1 = xOf(arc[0]), x2 = xOf(arc[1]);
+    const rx = (x2-x1)/2, ry = Math.max(rx * 0.5, 12);
+    ctx.strokeStyle = BG_COLS[i % BG_COLS.length]; ctx.lineWidth = 3; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.ellipse((x1+x2)/2, baseY, rx, ry, 0, Math.PI, 0); ctx.stroke();
+    ctx.globalAlpha = 1;
+  });
+
+  // witness arcs (bold, on top)
+  function drawArc(endpoints, color, label, dashed) {
+    const x1 = xOf(endpoints[0]), x2 = xOf(endpoints[1]);
+    const cx = (x1+x2)/2, rx = (x2-x1)/2, ry = Math.max(rx * 0.6, 16);
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+    ctx.setLineDash(dashed ? [6,3] : []);
+    ctx.beginPath(); ctx.ellipse(cx, baseY, rx, ry, 0, Math.PI, 0); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = color; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(label, cx, baseY - ry - 6);
+  }
+
+  drawArc(arcRed, '#e74c3c', labelRed, true);
+  drawArc(arcBlue, '#1565c0', labelBlue, false);
+
+  // crossing X
+  const allPts = [arcRed[0], arcRed[1], arcBlue[0], arcBlue[1]].sort((a,b)=>a-b);
+  const xCross = (xOf(allPts[1]) + xOf(allPts[2])) / 2;
+  ctx.fillStyle = '#c62828'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('✗', xCross, baseY - 30);
+
+  // crossing pattern at top
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillText(allPts.join(' < ') + '  →  ' + (lang==='zh'?'交叉！':'crossing!'), W/2, 13);
+
+  // elements
+  const crossSet = [arcRed[0], arcRed[1], arcBlue[0], arcBlue[1]];
+  for (let i = 1; i <= n; i++) {
+    ctx.fillStyle = crossSet.includes(i) ? '#c62828' : '#666';
+    ctx.beginPath(); ctx.arc(xOf(i), baseY, 9, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(i, xOf(i), baseY);
+  }
+}
+
+// ---- Step 7: Two-chain construction ----
+function renderStep7() {
+  const viz = document.getElementById('vizArea');
+  const maxS = currentN - 1;
+
+  viz.innerHTML = `<div class="card fade-in">
+    <h2>${T('s7_title')}</h2>
+    <p>${T('s7_p1')}</p>
+    <p>${T('s7_p2')}</p>
+    <p>${T('s7_p3')}</p>
+    <p>${T('s7_p3b')}</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin:10px 0">
+      <div style="flex:1;min-width:250px;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px">
+        <div style="font-weight:600;font-size:13px;color:#e65100;margin-bottom:4px">❌ ${T('s7_case1_title')}</div>
+        <canvas id="crossCanvas1" width="320" height="130" style="width:100%;border-radius:6px;background:#fffef5"></canvas>
+        <div style="font-size:12px;color:#888;margin-top:4px">${T('s7_case1_text')}</div>
+      </div>
+      <div style="flex:1;min-width:250px;background:#fce4ec;border:1px solid #f8bbd0;border-radius:8px;padding:10px">
+        <div style="font-weight:600;font-size:13px;color:#c62828;margin-bottom:4px">❌ ${T('s7_case2_title')}</div>
+        <canvas id="crossCanvas2" width="320" height="130" style="width:100%;border-radius:6px;background:#fef8f9"></canvas>
+        <div style="font-size:12px;color:#888;margin-top:4px">${T('s7_case2_text')}</div>
+      </div>
+    </div>
+    <p>${T('s7_p3c')}</p>
+    <div class="ctrl"><label>n =</label>${nSelector(currentN, n => { currentN = n; renderStep7(); })}
+    <label style="margin-left:12px">${T('s7_split_point')}: <b id="sVal">0</b></label>
+    <input type="range" id="sSlider" min="0" max="${maxS}" value="0" style="width:200px">
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+      <canvas id="chainCanvas" width="350" height="300" style="border:1px solid #eee;border-radius:10px;background:#fafafa"></canvas>
+      <div id="chainDetail" style="flex:1;min-width:200px"></div>
+    </div>
+    <div class="try-it"><b>💡</b> ${T('s7_try')}</div>
+  </div>`;
+
+  function updateChain() {
+    const s = +document.getElementById('sSlider').value;
+    document.getElementById('sVal').textContent = s;
+    const partition = twoChain(currentN, s);
+    drawPartition(document.getElementById('chainCanvas'), partition, currentN, { label: `π_${s}` });
+    showSidePartition(partition, currentN, `<b>π_${s}</b><br>${pStr(partition)}`);
+
+    const splits = getSplits(partition).length;
+    const merges = getMerges(partition).length;
+    const k = partition.length;
+    const deg = splits + merges;
+
+    const leftStr = s === 0 ? T('s7_empty') : s === 1 ? '{1}' : `{1,...,${s}}`;
+    const rightStr = s >= currentN ? T('s7_empty') : s === currentN - 1 ? `{${currentN}}` : `{${s+1},...,${currentN}}`;
+
+    document.getElementById('chainDetail').innerHTML = `
+      <div style="background:#f8f8f8;border-radius:10px;padding:16px;font-size:14px;line-height:2">
+        <div><b>π_${s}</b>: ${pStr(partition)}</div>
+        <div>${T('s7_left_chain')}: ${leftStr}</div>
+        <div>${T('s7_right_chain')}: ${rightStr}</div>
+        <div style="border-top:1px solid #e0e0e0;margin:8px 0;padding-top:8px">
+          <span style="color:#3498db">${T('lbl_splits')} = ${splits}</span> (= n−k = ${currentN}−${k} = ${currentN-k})
+        </div>
+        <div>
+          <span style="color:#e74c3c">${T('lbl_merges')} = ${merges}</span> (= k−1 = ${k}−1 = ${k-1})
+        </div>
+        <div style="font-size:16px;font-weight:700;margin-top:8px;color:${deg===currentN-1?'#27ae60':'#e74c3c'}">
+          ${T('lbl_degree')} = ${deg} ${deg===currentN-1 ? T('s7_verified') : '✗'}
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:4px;flex-wrap:wrap">
+        ${Array.from({length:currentN}, (_,i) =>
+          `<button class="s-btn${i===s?' active':''}" data-sv="${i}">${i}</button>`
+        ).join('')}
+      </div>
+    `;
+
+    document.querySelectorAll('#chainDetail .s-btn').forEach(b =>
+      b.addEventListener('click', () => {
+        document.getElementById('sSlider').value = b.dataset.sv;
+        updateChain();
+      })
+    );
+  }
+
+  document.getElementById('sSlider').addEventListener('input', updateChain);
+  updateChain();
+
+  // Draw crossing examples (static)
+  // Case 1: same-chain skip (n=6, one chain {1,6}→{2,5}→{3,4})
+  // Try merge {1,6}+{3,4}, skipping {2,5}. Witness arcs [1,3] x [2,5].
+  drawCrossingDiagram('crossCanvas1', 6,
+    [[1,6],[2,5],[3,4]],           // bg: nested chain
+    [1,3], [2,5],                   // witness arcs
+    '{1,3,4,6}', '{2,5}');          // labels, no split line
+
+  // Case 2: cross-chain (n=8, left {1,6}{2,5}{3,4} | right {7,8})
+  // Try merge {2,5}+{7,8} across chains. Witness arcs [2,7] x [1,6].
+  drawCrossingDiagram('crossCanvas2', 8,
+    [[1,6],[2,5],[3,4],[7,8]],      // bg: left chain + right chain
+    [2,7], [1,6],                    // witness arcs
+    '{2,5,7,8}', '{1,6}',           // labels
+    6);                              // split line after element 6
+}
+
+// ---- Step 8: Uniqueness ----
+function renderStep8() {
+  const parts = getNC(currentN);
+  const minDeg = currentN - 1;
+  const viz = document.getElementById('vizArea');
+
+  const small = parts.filter(p => p.every(b => b.length <= 2));
+  const data = small.map(p => {
+    const s = getSplits(p).length, m = getMerges(p).length;
+    const deg = s + m;
+    const tc = isTwoChain(p, currentN);
+    return { p, deg, isMin: deg === minDeg, isTwoChain: tc >= 0, tcIndex: tc };
+  });
+
+  let rows = '';
+  data.forEach(d => {
+    rows += `<tr class="${d.isMin?'min-row':''}" style="cursor:pointer" data-p="${encodeURIComponent(JSON.stringify(d.p))}">
+      <td style="font-family:monospace;font-size:11px;text-align:left">${pStr(d.p)}</td>
+      <td><b>${d.deg}</b></td>
+      <td>${d.isMin?'<span style="color:#27ae60">✓</span>':''}</td>
+      <td>${d.isTwoChain?`<span style="color:#27ae60">π_${d.tcIndex}</span>`:''}</td>
+    </tr>`;
+  });
+
+  const minCount = data.filter(d => d.isMin).length;
+
+  viz.innerHTML = `<div class="card fade-in" style="max-height:100%;overflow-y:auto">
+    <h2>${T('s8_title')}</h2>
+    <p>${T('s8_p1')}</p>
+    <p>${T('s8_p2')}</p>
+    <p>${T('s8_p3')}</p>
+    <p>${T('s8_p4')}</p>
+    <div class="ctrl"><label>n =</label>${nSelector(currentN, n => { currentN = n; renderStep8(); })}</div>
+    <table class="data-table">
+      <tr><th style="text-align:left">${T('s8_partition')}</th><th>${T('s8_degree')}</th><th>${T('s8_ismin')}</th><th>${T('s8_is_twochain')}</th></tr>
+      ${rows}
+    </table>
+    <div class="highlight" style="font-size:14px">
+      ${T('s8_conclusion')(currentN, minCount)}
+    </div>
+    <div class="try-it"><b>💡</b> ${T('s8_try')}</div>
+  </div>`;
+
+  document.querySelectorAll('.data-table tr[data-p]').forEach(row => {
+    row.addEventListener('click', () => {
+      try {
+        const p = JSON.parse(decodeURIComponent(row.dataset.p));
+        const tc = isTwoChain(p, currentN);
+        showSidePartition(p, currentN,
+          `<b>${pStr(p)}</b><br>${T('lbl_degree')} = ${getSplits(p).length + getMerges(p).length}<br>${tc>=0 ? `π_${tc}` : ''}`
+        );
+      } catch(e) { console.warn('row click error', e); }
+    });
+  });
+}
+
+// ========== Language toggle ==========
+function applyLang() {
+  document.getElementById('htmlRoot').lang = lang === 'zh' ? 'zh' : 'en';
+  document.title = T('html_title');
+  document.getElementById('headerTitle').innerHTML = T('header_title');
+  document.getElementById('sideTitle').textContent = T('side_title');
+  resetSideInfo();
+  goStep(currentStep);
+}
+
+document.querySelectorAll('.lang-sw button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-sw button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    lang = btn.dataset.lang;
+    applyLang();
+  });
+});
+
+// ========== Init ==========
+buildProgress();
+resetSideInfo();
+goStep(0);
+</script>
+</body>
+</html>

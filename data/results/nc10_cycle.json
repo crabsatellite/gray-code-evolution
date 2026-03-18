@@ -1,0 +1,7 @@
+{
+  "n": 10,
+  "vertices": 16796,
+  "edges": 125970,
+  "attempt": 1,
+  "method": "warnsdorff_rotation_closure"
+}

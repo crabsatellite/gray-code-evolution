@@ -1,0 +1,8 @@
+{
+  "n": 14,
+  "vertices": 2674440,
+  "attempt": 1,
+  "time_seconds": 83785.56,
+  "method": "warnsdorff_numpy_rotation_closure",
+  "note": "Reproduce with: python verify_all.py --full"
+}

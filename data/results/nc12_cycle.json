@@ -1,0 +1,8 @@
+{
+  "n": 12,
+  "vertices": 208012,
+  "edges": 1961256,
+  "attempt": 1,
+  "time_seconds": 96.77,
+  "method": "warnsdorff_rotation_closure"
+}
