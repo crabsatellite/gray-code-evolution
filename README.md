@@ -1,9 +1,14 @@
 # Hamilton Cycles in the Noncrossing Partition Refinement Graph
 
+[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.18957708-blue?style=flat-square&logo=zenodo)](https://doi.org/10.5281/zenodo.18957708)
+[![Status](https://img.shields.io/badge/status-under%20review%20(EJC)-yellow?style=flat-square)](https://www.combinatorics.org/)
+
 Companion code for the paper:
 
 > **Hamilton Cycles in the Noncrossing Partition Refinement Graph**
 > Alex Chengyu Li, 2026
+>
+> Under review at *Electronic Journal of Combinatorics*
 
 ## Interactive Proof Explorer
 
@@ -50,6 +55,18 @@ data/results/       Pre-computed cycle metadata for each even n
 
 - Python ≥ 3.9
 - NumPy ≥ 1.24 (only needed for `--full`)
+
+## Citation
+
+```bibtex
+@article{li2026hamilton,
+  title   = {Hamilton Cycles in the Noncrossing Partition Refinement Graph},
+  author  = {Li, Alex Chengyu},
+  year    = {2026},
+  doi     = {10.5281/zenodo.18957708},
+  note    = {Under review at Electronic Journal of Combinatorics}
+}
+```
 
 ## License
 
