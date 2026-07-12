@@ -1,5 +1,10 @@
 [
   {
+    "label": "def:refinement-graph",
+    "title": "Refinement-graph adjacency is exactly one explicit block merge or split",
+    "lean": ["NCRefinementGraph_adj_iff_single_merge"]
+  },
+  {
     "label": "lem:bipartite",
     "title": "Block-count parity is a bipartition",
     "lean": ["NCRefinementGraph_isBipartite"]

@@ -3,9 +3,17 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 
-\dateline{July 12, 2026}{}{}
 \MSC{05A18, 05C45, 05C85}
-\Copyright{The author. Released under the CC BY-ND license (International 4.0).}
+
+% Initial-submission presentation: retain the journal's typography without
+% displaying unassigned volume, paper number, DOI, or publication dates.
+\makeatletter
+\renewcommand{\maketitle}{\date{}\old@maketitle}
+\renewcommand{\ps@plain}{%
+  \renewcommand{\@oddfoot}{\hfil\thepage\hfil}%
+  \renewcommand{\@evenfoot}{\hfil\thepage\hfil}}
+\pagestyle{plain}
+\makeatother
 
 \ifdefined\publicmode
   \newcommand{\blindmode}{0}
@@ -66,6 +74,7 @@ Write $X_n=\{0,1,\ldots,n-1\}$ with its cyclic order.  A partition of
 $X_n$ is \emph{noncrossing} if there are no $a<b<c<d$ for which $a,c$
 belong to one block and $b,d$ belong to another.  The set $\NC(n)$ of all
 noncrossing partitions is the Kreweras lattice under refinement~\cite{K,S,SU}.
+\paragraph{Refinement graph.}\label{def:refinement-graph}
 Its cover graph $\NCR(n)$ has vertex set $\NC(n)$; two vertices are adjacent
 when one is obtained from the other by merging exactly two blocks, with the
 result still noncrossing.
@@ -147,7 +156,7 @@ correspondence for noncrossing partitions, the number of blocks is the number
 of peaks.  Decomposing a nonempty tree at its root yields the recurrence
 \begin{equation}\label{eq:signed-recurrence}
  D_{n+1}=-D_n+\sum_{k=0}^{n-1}D_{k+1}D_{n-1-k},
- \qquad D_0=1,quad D_1=-1.
+ \qquad D_0=1,\quad D_1=-1.
 \end{equation}
 
 \begin{theorem}[Signed count]\label{thm:signed-count}
@@ -487,10 +496,18 @@ sequentially is delicate because a parent cycle is modified by its earlier
 children.  The following recursive formulation records exactly which edge
 occurrence remains available.
 
+At the recursive level, a \emph{cyclic code} is a cyclic list of distinct
+vertices with adjacent consecutive entries.  A two-vertex code records the
+two directed occurrences of its single undirected edge; codes on at least
+three vertices are ordinary simple cycles.  This harmless degenerate case is
+needed only inside the recursion.  The assembled root code below has at least
+three vertices and therefore gives a simple Hamilton cycle.
+
 \begin{lemma}[Block-tree assembly]\label{lem:tree-assembly}
-For every canonical matching $Q$ and even $n$, there is a cycle whose support
-is exactly the union of all Boolean blocks in the subtree rooted at $Q$.
-If $Q$ is nonroot, the cycle retains the outgoing port prescribed by the
+For every canonical matching $Q$ and even $n$, there is a cyclic code whose
+support is exactly the union of all Boolean blocks in the subtree rooted at
+$Q$.
+If $Q$ is nonroot, the cyclic code retains the outgoing port prescribed by the
 diamond joining $Q$ to $p(Q)$.
 \end{lemma}
 
@@ -498,7 +515,8 @@ diamond joining $Q$ to $p(Q)$.
 We prove simultaneously the following three assertions for the subtree at
 $Q$:
 \begin{enumerate}
-\item there is one simple cycle $Z_Q$;
+\item there is one cyclic code $Z_Q$, which is a simple cycle when its support
+has at least three vertices;
 \item its support is exactly the union of the Boolean blocks in the subtree;
 \item if $Q$ is nonroot, the prescribed outgoing directed edge of the block
 cycle of $Q$ is still an edge of $Z_Q$.
@@ -513,7 +531,7 @@ $e_k=(v_k,v_{k+1})$ as a directed edge occurrence.  By
 Lemma~\ref{lem:port-injection}, each child is assigned to a distinct $e_k$.
 For an unassigned occurrence $e_k$, define the corresponding piece to be the
 singleton list $[v_k]$.  For an occurrence assigned to a child $C$, the
-inductive cycle $Z_C$ still contains its prescribed outgoing edge $ab$.
+inductive cyclic code $Z_C$ still contains its prescribed outgoing edge $ab$.
 The joining diamond has opposite edges $e_k$ and $ab$.  Delete those two
 edges and use the two cross edges of the diamond.  Cutting $Z_C$ at $ab$
 turns it into a path through every vertex of the child subtree; adjoining
@@ -532,11 +550,12 @@ because a rooted tree has disjoint subtrees below distinct children.
 Finally, port injectivity ensures that no child subtree is inserted twice.
 Therefore all pieces are nonempty, internally simple, and pairwise disjoint.
 
-Their internal edges are either edges of a cut child cycle or one of the two
+Their internal edges are either edges of a cut child code or one of the two
 cross edges in its joining diamond.  The exit of the $k$th piece is adjacent
 to $v_{k+1}$, the head of the next piece; the final piece hands off to $v_0$
 in exactly the same way.  Flattening the cyclic sequence of pieces is thus a
-single simple cycle.
+single cyclic code, and a simple cycle whenever it has at least three
+vertices.
 
 Every vertex in the block of $Q$ occurs as exactly one $v_k$.  Every proper
 descendant belongs to the subtree of a unique child, and that entire child
@@ -580,13 +599,22 @@ unbalanced).  These cases give exactly the stated disjunction.
 \section{Machine-checked correspondence}\label{sec:formal}
 
 The accompanying Lean~4 package follows the proof above rather than the
-chronology of its discovery.  Table~\ref{tab:lean-map} lists the exact
-declarations consumed by each paper statement.  The file
+chronology of its discovery.  The public bridge declaration
+\leanname{NCRefinementGraph_adj_iff_single_merge} expands graph adjacency to
+the explicit two-block merge in either direction; the rank argument in the
+introduction identifies these steps with the order-theoretic covers.
+Table~\ref{tab:lean-map} lists selected declarations corresponding to the
+principal formal components of each paper statement.  It is a navigation
+index, not a machine-checked equivalence between arbitrary prose and Lean.
+The file
 \texttt{paper/theorem-map.json} is the machine-readable source of this table,
-and the package checker verifies that every paper label and every declaration
-is present.
+and the package checker verifies that every paper label is present and that
+every listed declaration exists, occurs in the table, and is kernel-checked
+by the Lean theorem-map module.  The complete classification itself is
+exactly the declaration
+\leanname{NCRefinementGraph_fin_isHamiltonian_iff}.
 
-\begingroup\small
+\begingroup\footnotesize
 \begin{longtable}{p{0.34\textwidth}p{0.55\textwidth}}
 \caption{Paper statements and Lean declarations.}\label{tab:lean-map}\\
 \toprule
@@ -597,6 +625,8 @@ Paper label & Lean declarations\\
 Paper label & Lean declarations\\
 \midrule
 \endhead
+\leanname{def:refinement-graph} &
+\leanname{NCRefinementGraph_adj_iff_single_merge}\\
 \leanname{lem:bipartite} &
 \leanname{NCRefinementGraph_isBipartite}\\
 \leanname{thm:signed-count} &
@@ -633,7 +663,8 @@ Paper label & Lean declarations\\
 \endgroup
 
 The publication root is \texttt{Hamilton.HamiltonianCycles}.  The command
-\texttt{lake env lean Hamilton/HamiltonianCyclesAxiomAudit.lean} reports for
+\texttt{lake env lean --trust=0 Hamilton/HamiltonianCyclesAxiomAudit.lean}
+reports for
 the uniform even theorem, the odd obstruction, and the complete
 classification exactly
 \[
@@ -643,12 +674,17 @@ These are standard Lean/Mathlib logical dependencies.  No project axiom,
 \texttt{sorry}, \texttt{admit}, or \texttt{native\_decide} occurs in the
 publication dependency closure.
 
+The machine audit establishes the stated Lean theorems under their formal
+definitions and the foundational dependencies just listed.  The surrounding
+natural-language identification of those definitions and hypotheses remains
+part of the human mathematical exposition.
+
 The kernel-checked formalization and the initial technical manuscript
 snapshot were archived as version~v1.0.0 at
 \doi{10.5281/zenodo.21316751}; the version-independent DOI
 \doi{10.5281/zenodo.21316750} resolves to the latest archive version.  The
-present manuscript revision adds expository proof detail without changing
-any formal statement or Lean source.
+present manuscript revision adds expository proof detail and the public
+single-merge bridge above without changing the classification theorem.
 
 \section{Concluding remarks}
 

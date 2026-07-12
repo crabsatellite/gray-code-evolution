@@ -3,6 +3,7 @@ import Hamilton.HamiltonianCycles
 open Hamilton.Infrastructure
 open Hamilton.Infrastructure.Petersen
 
+#check NCRefinementGraph_adj_iff_single_merge
 #check NCRefinementGraph_isBipartite
 #check NC.signedDyckSumTree_closed_form
 #check NC.signedNCCount_univ_eq_signedDyckSumTree

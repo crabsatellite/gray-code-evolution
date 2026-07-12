@@ -23,6 +23,7 @@ bipartite-imbalance proof, not by enumeration.
 
 | Paper label | Mathematical statement | Lean declarations |
 |---|---|---|
+| `def:refinement-graph` | Refinement-graph adjacency is exactly one explicit block merge or split | `NCRefinementGraph_adj_iff_single_merge` |
 | `lem:bipartite` | Block-count parity is a bipartition | `NCRefinementGraph_isBipartite` |
 | `thm:signed-count` | Closed form for the signed noncrossing-partition count | `signedDyckSumTree_closed_form`, `signedNCCount_univ_eq_signedDyckSumTree` |
 | `thm:odd-obstruction` | Odd orders at least three are not Hamiltonian | `NCRefinementGraph_fin_odd_geq3_not_isHamiltonian` |
@@ -42,10 +43,11 @@ The toolchain is pinned in `lean-toolchain`. A first build may take several
 minutes while Lean compiles the complete transitive proof dependency set.
 
 ```powershell
+lake exe cache get
 lake build Hamilton.Infrastructure.HamiltonianClassification
 lake build Hamilton.HamiltonianCycles
 lake env lean Hamilton/HamiltonianCyclesTheoremMap.lean
-lake env lean Hamilton/HamiltonianCyclesAxiomAudit.lean
+lake env lean --trust=0 Hamilton/HamiltonianCyclesAxiomAudit.lean
 python scripts/render_publication_readme.py --check
 ```
 

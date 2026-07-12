@@ -19,7 +19,7 @@ Archival identifiers:
 - `paper/gray_code_evolution.tex`: manuscript source.
 - `paper/Li_Gray_Code_Evolution_2026.pdf`: public manuscript PDF.
 - `paper/Anonymous_Gray_Code_Evolution_2026.pdf`: blind manuscript PDF.
-- `paper/theorem-map.json`: exact paper-label to Lean-declaration map.
+- `paper/theorem-map.json`: selected paper-label to Lean-declaration navigation map.
 - `lean4/`: minimal transitive Lean source closure with semantic module names.
 
 The formal source tree contains only modules required by the publication
@@ -39,9 +39,10 @@ recursive square switching. The theorem for all natural numbers is
 
 ```powershell
 cd lean4
+lake exe cache get
 lake build Hamilton.HamiltonianCycles
 lake env lean Hamilton/HamiltonianCyclesTheoremMap.lean
-lake env lean Hamilton/HamiltonianCyclesAxiomAudit.lean
+lake env lean --trust=0 Hamilton/HamiltonianCyclesAxiomAudit.lean
 python scripts/render_publication_readme.py --check
 ```
 

@@ -116,4 +116,20 @@ theorem NCRefinementGraph_adj_def {α : Type*} [LinearOrder α]
     {s : Finset α} (π σ : NC s) :
     (NCRefinementGraph s).Adj π σ ↔ NC.Adj π σ := Iff.rfl
 
+/-- Public paper-to-Lean bridge: adjacency in the refinement graph is
+exactly one explicit merge of two distinct blocks, in either direction.
+
+The manuscript separately proves, using the rank of the noncrossing
+partition lattice, that these single-merge steps are precisely its cover
+relations. This theorem records the operational characterization used by
+the formal graph without leaving `NC.Adj` or `NC.mergesTo` opaque. -/
+theorem NCRefinementGraph_adj_iff_single_merge
+    {α : Type*} [LinearOrder α] {s : Finset α} (π σ : NC s) :
+    (NCRefinementGraph s).Adj π σ ↔
+      (∃ B₁ ∈ π.val.parts, ∃ B₂ ∈ π.val.parts, B₁ ≠ B₂ ∧
+          σ.val.parts = insert (B₁ ∪ B₂) ((π.val.parts.erase B₁).erase B₂)) ∨
+      (∃ B₁ ∈ σ.val.parts, ∃ B₂ ∈ σ.val.parts, B₁ ≠ B₂ ∧
+          π.val.parts = insert (B₁ ∪ B₂) ((σ.val.parts.erase B₁).erase B₂)) :=
+  Iff.rfl
+
 end Hamilton.Infrastructure
