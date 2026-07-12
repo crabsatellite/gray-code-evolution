@@ -151,9 +151,14 @@ Define the signed count
 \[
  D_n:=\sum_{\pi\in\NC(n)}(-1)^{b(\pi)}=|E_n|-|O_n|.
 \]
-Under the standard Dyck-word, or equivalently plane-binary-tree,
-correspondence for noncrossing partitions, the number of blocks is the number
-of peaks.  Decomposing a nonempty tree at its root yields the recurrence
+Use the standard Dyck-word, or equivalently plane-binary-tree,
+correspondence for noncrossing partitions in which the number of blocks is
+the number of peaks.  Let $p(T)$ be this peak count.  A tree with $n+1$
+nodes has the form $T=\operatorname{node}(L,R)$ with
+$|L|+|R|=n$.  If $L$ is empty, then $p(T)=1+p(R)$, so these trees contribute
+$-D_n$.  If $L$ is nonempty, write $|L|=k+1$; then
+$p(T)=p(L)+p(R)$ and $|R|=n-1-k$.  Summing over the possible subtree sizes
+therefore gives
 \begin{equation}\label{eq:signed-recurrence}
  D_{n+1}=-D_n+\sum_{k=0}^{n-1}D_{k+1}D_{n-1-k},
  \qquad D_0=1,\quad D_1=-1.
@@ -254,8 +259,9 @@ $c>a$; hence $x$ cannot decode to $a$.  The same argument with no outer chord
 shows that a root-fiber point cannot lie inside any chord.
 
 Suppose fibers based at $r$ and $s$ crossed, with $x_1<y_1<x_2<y_2$ in the
-two fibers.  If one key is $0$, the other fiber's chord has both endpoints
-between two root-fiber points, contradicting the root assertion.  Otherwise
+two fibers.  If one key is $0$, a point of the root fiber lies strictly
+between two points of the chord fiber and hence strictly inside its base
+chord, contradicting the root assertion.  Otherwise
 the two base chords are disjoint or nested because $Q$ is noncrossing.  The
 four alternating points force one fiber point into a properly nested chord
 with a different base, contradicting the preceding paragraph.
@@ -305,8 +311,16 @@ If $n$ is even, then $d(Q)$ is positive and odd.
 
 \section{Gray cycles, the block tree, and ports}\label{sec:ports}
 
-Order $F(Q)$ increasingly and use the binary-reflected Gray list on its
-subsets.  Adjacent masks differ by one free point, so
+Write $d=d(Q)$ and $F(Q)=\{u_0<u_1<\cdots<u_{d-1}\}$.  We use the binary-reflected Gray
+list with $u_0$ as the least significant coordinate.  Thus, with
+$G_0=(\varnothing)$,
+\[
+ G_d=G_{d-1}\mathbin{\Vert}
+ \bigl(\operatorname{rev}(G_{d-1})+u_{d-1}\bigr),
+\]
+where $+u_{d-1}$ inserts $u_{d-1}$ into every mask.  Equivalently, the
+recursive coordinate list is supplied in descending free-point order.
+Adjacent masks differ by one free point, so
 Theorem~\ref{thm:boolean-decomposition} sends every Gray edge to a refinement
 edge.
 
@@ -318,15 +332,16 @@ edge, to be consumed by the tree switch below.
 \end{lemma}
 
 \begin{proof}
-The reflected recursion
-\[
- G(x_0,x_1,\ldots)=G(x_1,\ldots),
- \operatorname{rev}(G(x_1,\ldots))+x_0
-\]
-lists every subset once, changes one coordinate at every step, and has a
-closing one-coordinate change.  Equation~\eqref{eq:free-ledger} makes the
-dimension positive.  Decoding gives the asserted refinement edges and the
-bijection gives distinctness and coverage.
+The displayed recursion lists every subset once, changes one coordinate at
+every step, and has closing pair $\{u_{d-1}\},\varnothing$.  It also has the
+following two least-significant-coordinate properties.  When $d\geq1$, for
+every $H\subseteq F(Q)\setminus\{u_0\}$, the masks $H$ and
+$H\cup\{u_0\}$ are consecutive.  When $d\geq2$, for every
+$H\subseteq F(Q)\setminus\{u_0,u_1\}$, the masks
+$H\cup\{u_0\}$ and $H\cup\{u_0,u_1\}$ are consecutive.  These assertions
+follow together by induction from the same recursion.  Equation
+\eqref{eq:free-ledger} makes the dimension positive.  Decoding gives the
+asserted refinement edges and the bijection gives distinctness and coverage.
 \end{proof}
 
 If $Q\neq\varnothing$, let $p(Q)$ be obtained by deleting the
@@ -404,8 +419,9 @@ If $i>0$, the least child free point lifts to $u_0$.  Hence
  M(\varnothing)=\{i,j\},\qquad
  M(\{0\})=\{0,i,j\}.
 \]
-The parent pair flips coordinate $0$, and the child pair
-$\varnothing,\{0\}$ also flips coordinate $0$.  The cross covers are
+By the first least-significant-coordinate property above, both the parent
+pair and the child pair $\varnothing,\{0\}$ are edges of their fixed Gray
+cycles.  The cross covers are
 \[
  P_C(\varnothing)\lessdot P_Q(\{i,j\}),\qquad
  P_C(\{0\})\lessdot P_Q(\{0,i,j\});
@@ -417,8 +433,9 @@ If $i=0$ and $j\geq2$, the least child free point lifts to $u_1$.  Thus
  M(\varnothing)=\{0,j\},\qquad
  M(\{0\})=\{0,1,j\}.
 \]
-The parent pair flips coordinate $1$, while the child pair again flips its
-coordinate $0$.  The cross covers are
+By the second least-significant-coordinate property, the parent pair is a
+Gray-cycle edge; by the first property, so is the child pair.  The cross
+covers are
 \[
  P_C(\varnothing)\lessdot P_Q(\{0,j\}),\qquad
  P_C(\{0\})\lessdot P_Q(\{0,1,j\});
@@ -543,8 +560,9 @@ $e_{k+1}$.
 We verify that concatenation introduces neither omissions nor repetitions.
 The vertices $v_k$ are distinct because the block Gray list is a cyclic
 listing.  A child-subtree piece contains no vertex in the block of $Q$:
-the canonical matching of every one of its vertices lies strictly below that
-child in the matching tree, whereas the vertices $v_k$ have canonical
+the canonical matching of every one of its vertices lies at or below that
+child, hence strictly below $Q$ in the matching tree, whereas the vertices
+$v_k$ have canonical
 matching exactly $Q$.  Two different child-subtree pieces are disjoint
 because a rooted tree has disjoint subtrees below distinct children.
 Finally, port injectivity ensures that no child subtree is inserted twice.
@@ -607,8 +625,9 @@ Table~\ref{tab:lean-map} lists selected declarations corresponding to the
 principal formal components of each paper statement.  It is a navigation
 index, not a machine-checked equivalence between arbitrary prose and Lean.
 The file
-\texttt{paper/theorem-map.json} is the machine-readable source of this table,
-and the package checker verifies that every paper label is present and that
+\texttt{paper/theorem-map.json} is the machine-readable source of this table.
+The public script \texttt{scripts/verify\_manuscript.py} verifies that every
+paper label is present and that
 every listed declaration exists, occurs in the table, and is kernel-checked
 by the Lean theorem-map module.  The complete classification itself is
 exactly the declaration

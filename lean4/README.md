@@ -43,6 +43,7 @@ The toolchain is pinned in `lean-toolchain`. A first build may take several
 minutes while Lean compiles the complete transitive proof dependency set.
 
 ```powershell
+python ../scripts/verify_manuscript.py
 lake exe cache get
 lake build Hamilton.Infrastructure.HamiltonianClassification
 lake build Hamilton.HamiltonianCycles

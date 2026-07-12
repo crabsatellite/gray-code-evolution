@@ -20,6 +20,7 @@ Archival identifiers:
 - `paper/Li_Gray_Code_Evolution_2026.pdf`: public manuscript PDF.
 - `paper/Anonymous_Gray_Code_Evolution_2026.pdf`: blind manuscript PDF.
 - `paper/theorem-map.json`: selected paper-label to Lean-declaration navigation map.
+- `scripts/verify_manuscript.py`: fail-closed public manuscript/map checker.
 - `lean4/`: minimal transitive Lean source closure with semantic module names.
 
 The formal source tree contains only modules required by the publication
@@ -38,6 +39,7 @@ recursive square switching. The theorem for all natural numbers is
 ## Verification
 
 ```powershell
+python scripts/verify_manuscript.py
 cd lean4
 lake exe cache get
 lake build Hamilton.HamiltonianCycles

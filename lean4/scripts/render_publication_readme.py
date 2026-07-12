@@ -80,6 +80,7 @@ def render() -> str:
             "minutes while Lean compiles the complete transitive proof dependency set.",
             "",
             "```powershell",
+            "python ../scripts/verify_manuscript.py",
             "lake exe cache get",
             "lake build Hamilton.Infrastructure.HamiltonianClassification",
             "lake build Hamilton.HamiltonianCycles",
