@@ -1,0 +1,32 @@
+import Hamilton.HamiltonianCycles
+
+open Hamilton.Infrastructure
+open Hamilton.Infrastructure.Petersen
+
+#check NCRefinementGraph_isBipartite
+#check NC.signedDyckSumTree_closed_form
+#check NC.signedNCCount_univ_eq_signedDyckSumTree
+#check NC.NCRefinementGraph_fin_odd_geq3_not_isHamiltonian
+#check CanonicalMatching.commonKey_root_or_chord
+#check CanonicalMatching.point_in_chord_hull
+#check CanonicalMatching.point_avoids_nested_chord
+#check CanonicalMatching.root_point_avoids_chord
+#check Encoding.decodeState_bijective
+#check Encoding.stateEquivNC
+#check Encoding.decodedNC_mergesTo_insert
+#check Switch.rankGrayCycle
+#check Switch.rankGrayVertices_nodup
+#check Switch.rankGrayVertices_chain
+#check Ports.parent_card
+#check Global.parentOption_eq_none_iff
+#check Global.inSubtree_root
+#check Ports.joiningDiamond_nonempty
+#check Ports.joiningDiamond
+#check Global.portAssignedToPair_exists
+#check Global.assignedPair_injective
+#check Global.outgoingPair_not_assigned
+#check Switch.EdgePieceSystem.toCycleCode
+#check Global.subtreeCycle
+#check Global.rootCycleCode_support
+#check NC.NCRefinementGraph_fin_even_geq4_isHamiltonian_petersen
+#check NC.NCRefinementGraph_fin_isHamiltonian_iff

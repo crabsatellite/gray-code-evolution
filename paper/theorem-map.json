@@ -1,0 +1,62 @@
+[
+  {
+    "label": "lem:bipartite",
+    "title": "Block-count parity is a bipartition",
+    "lean": ["NCRefinementGraph_isBipartite"]
+  },
+  {
+    "label": "thm:signed-count",
+    "title": "Closed form for the signed noncrossing-partition count",
+    "lean": ["signedDyckSumTree_closed_form", "signedNCCount_univ_eq_signedDyckSumTree"]
+  },
+  {
+    "label": "thm:odd-obstruction",
+    "title": "Odd orders at least three are not Hamiltonian",
+    "lean": ["NCRefinementGraph_fin_odd_geq3_not_isHamiltonian"]
+  },
+  {
+    "label": "lem:key-fibers",
+    "title": "Decoded key fibers are noncrossing",
+    "lean": ["commonKey_root_or_chord", "point_in_chord_hull", "point_avoids_nested_chord", "root_point_avoids_chord"]
+  },
+  {
+    "label": "thm:boolean-decomposition",
+    "title": "Canonical matching and mask coordinates are bijective",
+    "lean": ["decodeState_bijective", "stateEquivNC", "decodedNC_mergesTo_insert"]
+  },
+  {
+    "label": "lem:block-gray-cycle",
+    "title": "Every odd-dimensional Boolean block has a reflected Gray cycle",
+    "lean": ["rankGrayCycle", "rankGrayVertices_nodup", "rankGrayVertices_chain"]
+  },
+  {
+    "label": "lem:canonical-block-tree",
+    "title": "Lexicographic chord deletion defines the rooted block tree",
+    "lean": ["parent_card", "parentOption_eq_none_iff", "inSubtree_root"]
+  },
+  {
+    "label": "lem:joining-diamond",
+    "title": "Every parent-child edge has an explicit joining diamond",
+    "lean": ["joiningDiamond_nonempty", "joiningDiamond"]
+  },
+  {
+    "label": "lem:port-injection",
+    "title": "Incoming ports are injective and avoid the outgoing port",
+    "lean": ["portAssignedToPair_exists", "assignedPair_injective", "outgoingPair_not_assigned"]
+  },
+  {
+    "label": "lem:tree-assembly",
+    "title": "Recursive square switching produces one cycle on each block subtree",
+    "lean": ["EdgePieceSystem.toCycleCode", "subtreeCycle", "rootCycleCode_support"]
+  },
+  {
+    "label": "thm:uniform-even",
+    "title": "Uniform construction for every even order at least four",
+    "lean": ["NCRefinementGraph_fin_even_geq4_isHamiltonian_petersen"]
+  },
+  {
+    "label": "thm:classification",
+    "title": "Complete Hamiltonicity classification for every natural n",
+    "lean": ["NCRefinementGraph_fin_isHamiltonian_iff"]
+  }
+]

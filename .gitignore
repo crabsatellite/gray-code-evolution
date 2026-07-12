@@ -1,2 +1,8 @@
-__pycache__/
-*.pyc
+.lake/
+lean4/.lake/
+*.olean
+*.ilean
+*.trace
+paper/*.aux
+paper/*.log
+paper/*.out

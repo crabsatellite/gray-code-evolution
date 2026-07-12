@@ -1,0 +1,616 @@
+\documentclass[12pt]{article}
+\usepackage[amsmath]{e-jc}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+\dateline{July 12, 2026}{}{}
+\MSC{05A18, 05C45, 05C85}
+\Copyright{The author. Released under the CC BY-ND license (International 4.0).}
+
+\ifdefined\publicmode
+  \newcommand{\blindmode}{0}
+\else
+  \newcommand{\blindmode}{1}
+\fi
+
+\title{Hamilton Cycles in the Noncrossing Partition Refinement Graph}
+
+\ifnum\blindmode=1
+  \author{Anonymous}
+  \authortext{}{Anonymous Institution.}
+\else
+  \author{Alex Chengyu Li}
+  \authortext{}{Independent Researcher, Tokyo, Japan (\email{cl7076@nyu.edu}).}
+\fi
+
+\newcommand{\NCR}{\mathrm{NC}_R}
+\newcommand{\NC}{\mathrm{NC}}
+\newcommand{\catalan}{\mathrm{Cat}}
+\newcommand{\leanname}[1]{\nolinkurl{#1}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $\NCR(n)$ be the cover graph of the refinement order on the
+noncrossing partitions of an $n$-element cyclically ordered set.  Thus an
+edge merges two blocks, or reverses such a merge by splitting one block.
+We determine exactly when this graph has a Hamilton cycle.  For odd
+$n\geq3$, block-count parity is a bipartition and a signed Dyck-tree
+recurrence gives color-class difference
+$(-1)^{m+1}\catalan_m$ at $n=2m+1$, so a Hamilton cycle is impossible.
+For every even $n\geq4$, we give one uniform construction.  A noncrossing
+partition is encoded bijectively by a noncrossing partial matching $Q$ and a
+Boolean mask on the unmatched nonroot points.  Each fixed $Q$ is therefore
+an odd-dimensional hypercube and carries a cyclic reflected Gray code.
+Deleting the lexicographically first chord makes the matchings into a rooted
+tree.  For every tree edge we exhibit an explicit refinement diamond; an
+injective port assignment makes all selected cube edges disjoint.  Recursive
+square switching then joins all Boolean cycles into one Hamilton cycle.
+With the formal convention for singleton graphs, the complete classification
+for all natural $n$ is
+\[
+ \NCR(n)\text{ is Hamiltonian}
+ \quad\Longleftrightarrow\quad
+ n\in\{0,1\}\ \text{or}\ (n\text{ is even and }n\geq4).
+\]
+The construction, the odd obstruction, the small cases, and the final
+classification are formalized in Lean~4.  The publication theorem has no
+project axiom; its axiom audit is exactly
+\texttt{[propext, Classical.choice, Quot.sound]}.
+\end{abstract}
+
+\section{Introduction}
+
+Write $X_n=\{0,1,\ldots,n-1\}$ with its cyclic order.  A partition of
+$X_n$ is \emph{noncrossing} if there are no $a<b<c<d$ for which $a,c$
+belong to one block and $b,d$ belong to another.  The set $\NC(n)$ of all
+noncrossing partitions is the Kreweras lattice under refinement~\cite{K,S,SU}.
+Its cover graph $\NCR(n)$ has vertex set $\NC(n)$; two vertices are adjacent
+when one is obtained from the other by merging exactly two blocks, with the
+result still noncrossing.
+
+The adjacency here is not the element-transfer adjacency in the cyclic Gray
+code of Huemer, Hurtado, Noy, and Oma\~na-Pulido~\cite{HHNP}.  The general
+permutation-language results of Hartung--Hoang--M\"utze--Williams and
+Hoang--M\"utze~\cite{HHMW,HM} provide Hamilton paths for many quotient
+graphs, but do not identify the refinement cover graph with such a quotient.
+The arbitrary-sublist refinement Gray-code problem considered by Merino,
+Namrata, and Williams~\cite{MNW} is also different from the spanning cycle
+problem for the full lattice.
+
+Petersen~\cite{Pet} constructed a symmetric Boolean decomposition of the
+noncrossing partition lattice using valley hopping.  Our proof makes the
+corresponding coordinates direct: a Boolean block is indexed by a canonical
+noncrossing partial matching, and its Boolean coordinate is an explicit mask.
+This direct description is the one used in the machine proof.
+
+Our main result is the following complete classification.
+
+\begin{theorem}[Complete classification]\label{thm:classification}
+Under the closed-spanning-walk convention used in the formalization, for
+every $n\in\mathbb N$,
+\[
+ \NCR(n)\text{ has a Hamilton cycle}
+ \quad\Longleftrightarrow\quad
+ n=0\ \text{or}\ n=1\ \text{or}\
+ (n\text{ is even and }4\leq n).
+\]
+Consequently, in the usual nondegenerate range $n\geq3$, $\NCR(n)$ has a
+Hamilton cycle if and only if $n$ is even.
+\end{theorem}
+
+Sections~\ref{sec:odd} and~\ref{sec:coordinates}--\ref{sec:assembly} prove
+the two directions.  Section~\ref{sec:formal} gives the exact correspondence
+between the displayed results and Lean declarations.
+
+\section{The odd-order obstruction}\label{sec:odd}
+
+Let $b(\pi)$ denote the number of blocks of $\pi$.  Every cover changes
+$b(\pi)$ by one, hence block-count parity colors the graph properly.
+
+\begin{lemma}\label{lem:bipartite}
+The graph $\NCR(n)$ is bipartite, with color classes
+\[
+ E_n=\{\pi:b(\pi)\text{ is even}\},\qquad
+ O_n=\{\pi:b(\pi)\text{ is odd}\}.
+\]
+\end{lemma}
+
+\begin{proof}
+A cover relation merges two blocks or splits one block into two.  Thus the
+two endpoints have block counts differing by exactly one, and therefore have
+opposite parity.
+\end{proof}
+
+Define the signed count
+\[
+ D_n:=\sum_{\pi\in\NC(n)}(-1)^{b(\pi)}=|E_n|-|O_n|.
+\]
+Under the standard Dyck-word, or equivalently plane-binary-tree,
+correspondence for noncrossing partitions, the number of blocks is the number
+of peaks.  Decomposing a nonempty tree at its root yields the recurrence
+\begin{equation}\label{eq:signed-recurrence}
+ D_{n+1}=-D_n+\sum_{k=0}^{n-1}D_{k+1}D_{n-1-k},
+ \qquad D_0=1,quad D_1=-1.
+\end{equation}
+
+\begin{theorem}[Signed count]\label{thm:signed-count}
+For $m\geq1$,
+\[
+ D_{2m}=0,
+ \qquad
+ D_{2m+1}=(-1)^{m+1}\catalan_m,
+\]
+where $\catalan_m=\frac1{m+1}\binom{2m}{m}$.
+\end{theorem}
+
+\begin{proof}
+We use simultaneous strong induction on $m$.  In
+\eqref{eq:signed-recurrence} for $D_{2m}$, the two indices in every product
+sum to $2m-1$.  Hence one index is positive and even, except for the boundary
+term $D_{2m-1}D_0$.  Every nonboundary term vanishes by induction, and the
+boundary term cancels the initial $-D_{2m-1}$.  Thus $D_{2m}=0$.
+
+For $D_{2m+1}$, all terms having a positive even index vanish.  The remaining
+terms have indices $2j+1$ and $2(m-1-j)+1$.  By induction their product is
+\[
+ (-1)^{j+1}\catalan_j
+ (-1)^{m-j}\catalan_{m-1-j}
+ =(-1)^{m+1}\catalan_j\catalan_{m-1-j}.
+\]
+The initial term is zero because $D_{2m}=0$.  Summing and using the Catalan
+recurrence
+$\catalan_m=\sum_{j=0}^{m-1}\catalan_j\catalan_{m-1-j}$ proves the formula.
+The initial values $D_0=1$ and $D_1=-1$ start the induction.
+\end{proof}
+
+\begin{theorem}[Odd-order obstruction]\label{thm:odd-obstruction}
+If $n\geq3$ is odd, then $\NCR(n)$ has no Hamilton cycle.
+\end{theorem}
+
+\begin{proof}
+Write $n=2m+1$.  Since $n\geq3$, $m\geq1$, and
+Theorem~\ref{thm:signed-count} gives
+$|E_n|-|O_n|=(-1)^{m+1}\catalan_m\neq0$.  Every cycle in a bipartite graph
+uses equally many vertices from its two color classes.  A spanning cycle
+would therefore force $|E_n|=|O_n|$, a contradiction.
+\end{proof}
+
+\section{Canonical matching--mask coordinates}\label{sec:coordinates}
+
+We now assume $n>0$.  A \emph{canonical matching} is a set $Q$ of ordered
+chords $(a,b)$ with
+\[
+ 0<a<b<n,
+\]
+such that distinct chords have disjoint endpoints and no two chords cross.
+The chords may be nested.  Let $\operatorname{end}(Q)$ be their endpoint set
+and define the free points
+\[
+ F(Q)=X_n\setminus(\{0\}\cup\operatorname{end}(Q)).
+\]
+For a chord endpoint $x$, let $e_Q(x)$ be the left endpoint of its chord.
+For $x\in F(Q)$, let $a_Q(x)$ be the left endpoint of the innermost chord
+whose open interval contains $x$, or $0$ if there is no such chord.
+
+For a mask $A\subseteq F(Q)$ define
+\begin{equation}\label{eq:decode-key}
+ \kappa_{Q,A}(x)=
+ \begin{cases}
+ e_Q(x),&x\in\operatorname{end}(Q),\\
+ a_Q(x),&x\in A,\\
+ x,&\text{otherwise}.
+ \end{cases}
+\end{equation}
+Let $P_Q(A)$ be the partition into the fibers of $\kappa_{Q,A}$.
+
+\begin{lemma}[Key-fiber geometry]\label{lem:key-fibers}
+If two distinct points have the same decoded key, then that key is either
+$0$ or the left endpoint of a chord of $Q$.  A fiber based at a chord
+$(a,b)$ is contained in $[a,b]$.  A point in that fiber cannot lie strictly
+inside a properly nested chord with a different left endpoint, and a point
+in the root fiber cannot lie strictly inside any chord of $Q$.
+Consequently, two distinct decoded fibers cannot cross.
+\end{lemma}
+
+\begin{proof}
+The first assertion follows directly from~\eqref{eq:decode-key}.  A point can
+change its own key only by being a chord endpoint or by being selected in the
+mask.  In the first case the common key is that chord's left endpoint.  In
+the second it is the left endpoint of the innermost containing chord, or
+$0$.
+
+Fix $(a,b)\in Q$.  Its endpoints decode to $a$.  If another point $x$ also
+decodes to $a$, then either $x$ is one of these endpoints or $x$ is selected
+and $(a,b)$ is its innermost containing chord; in either case $a\leq x\leq b$.
+If $(c,d)$ is properly nested in $(a,b)$ and $c<x<d$, then $(c,d)$ is a
+strictly inner containing chord, so the anchor of a selected $x$ is at least
+$c>a$; hence $x$ cannot decode to $a$.  The same argument with no outer chord
+shows that a root-fiber point cannot lie inside any chord.
+
+Suppose fibers based at $r$ and $s$ crossed, with $x_1<y_1<x_2<y_2$ in the
+two fibers.  If one key is $0$, the other fiber's chord has both endpoints
+between two root-fiber points, contradicting the root assertion.  Otherwise
+the two base chords are disjoint or nested because $Q$ is noncrossing.  The
+four alternating points force one fiber point into a properly nested chord
+with a different base, contradicting the preceding paragraph.
+\end{proof}
+
+\begin{theorem}[Boolean decomposition]\label{thm:boolean-decomposition}
+For every $n>0$, the map
+\[
+ (Q,A)\longmapsto P_Q(A),
+ \qquad Q\text{ canonical},\quad A\subseteq F(Q),
+\]
+is a bijection onto $\NC(n)$.  Moreover, if $q\in F(Q)\setminus A$, then
+$P_Q(A\cup\{q\})$ covers $P_Q(A)$ in the refinement lattice.
+\end{theorem}
+
+\begin{proof}
+First note that $\kappa_{Q,A}(x)\leq x$.  By
+Lemma~\ref{lem:key-fibers}, four alternating points cannot lie in two
+different fibers.  Thus $P_Q(A)$ is noncrossing.
+
+Conversely, for $\pi\in\NC(n)$, take from every nonsingleton block not based
+at $0$ the chord joining its minimum and maximum.  Distinct blocks give
+endpoint-disjoint noncrossing chords, so this is a canonical matching
+$Q(\pi)$.  Put in $A(\pi)$ exactly those remaining nonroot, nonendpoint
+points whose block is nontrivial.  The minimum of the block containing such a
+point is precisely the left endpoint of the innermost containing chord, or
+$0$.  Therefore
+\[
+ \kappa_{Q(\pi),A(\pi)}(x)=\min(\text{the block of }x)
+\]
+for every $x$, and hence $P_{Q(\pi)}(A(\pi))=\pi$.
+
+The same description recovers $Q$ from the extrema of the nonroot
+nonsingleton fibers of $P_Q(A)$, and then recovers $A$ by testing which free
+points have nonsingleton fibers.  The decoder is therefore injective and
+surjective.  Finally, inserting $q$ into the mask changes only its key, from
+$q$ to $a_Q(q)$; it merges the singleton block $\{q\}$ with the block based
+at $a_Q(q)$ and leaves every other block unchanged.  This is one refinement
+cover.
+\end{proof}
+
+The dimension of the block indexed by $Q$ is
+\begin{equation}\label{eq:free-ledger}
+ d(Q):=|F(Q)|=n-1-2|Q|.
+\end{equation}
+If $n$ is even, then $d(Q)$ is positive and odd.
+
+\section{Gray cycles, the block tree, and ports}\label{sec:ports}
+
+Order $F(Q)$ increasingly and use the binary-reflected Gray list on its
+subsets.  Adjacent masks differ by one free point, so
+Theorem~\ref{thm:boolean-decomposition} sends every Gray edge to a refinement
+edge.
+
+\begin{lemma}[Block Gray cycle]\label{lem:block-gray-cycle}
+For even $n$, every block $\{P_Q(A):A\subseteq F(Q)\}$ has a cyclic Gray
+listing that visits each of its vertices once.  For $d(Q)\geq3$ it is a
+simple cycle; for $d(Q)=1$ it is the two directed occurrences of the unique
+edge, to be consumed by the tree switch below.
+\end{lemma}
+
+\begin{proof}
+The reflected recursion
+\[
+ G(x_0,x_1,\ldots)=G(x_1,\ldots),
+ \operatorname{rev}(G(x_1,\ldots))+x_0
+\]
+lists every subset once, changes one coordinate at every step, and has a
+closing one-coordinate change.  Equation~\eqref{eq:free-ledger} makes the
+dimension positive.  Decoding gives the asserted refinement edges and the
+bijection gives distinctness and coverage.
+\end{proof}
+
+If $Q\neq\varnothing$, let $p(Q)$ be obtained by deleting the
+lexicographically first chord of $Q$.
+
+\begin{lemma}[Canonical block tree]\label{lem:canonical-block-tree}
+The map $p$ defines a rooted tree on canonical matchings, with root the empty
+matching.  Each parent step decreases chord count by one and increases free
+dimension by two.  Every canonical matching lies in the root subtree.
+\end{lemma}
+
+\begin{proof}
+Deleting a chord preserves endpoint disjointness and noncrossingness.
+It decreases $|Q|$ by one, so iteration terminates at the unique chordless
+matching.  The parent is uniquely determined by the lexicographically first
+chord.  Conversely, every nonroot matching has exactly that parent.  Thus the
+directed parent relation is acyclic, connected to the empty matching, and has
+unique parent at every nonroot vertex; it is a rooted tree.  Formula
+\eqref{eq:free-ledger} gives the dimension change.
+\end{proof}
+
+Let $C$ be a child of $Q$, obtained by inserting its first chord between the
+$i$th and $j$th free points of $Q$, $i<j$.  The reflected Gray cycles admit
+the following explicit opposite edges.  Indices in a mask refer to the
+increasing free-point order of the corresponding block.
+\begin{equation}\label{eq:ports}
+\begin{array}{c|c|c}
+ (i,j)&\text{parent edge in }Q&\text{child edge in }C\\ \hline
+ 1\leq i<j&\{i,j\},\{0,i,j\}&\varnothing,\{0\}\\
+ i=0,\ j\geq2&\{0,j\},\{0,1,j\}&\varnothing,\{0\}\\
+ (i,j)=(0,1)&\varnothing,\{d(Q)-1\}&
+      \varnothing,\{d(C)-1\}.
+\end{array}
+\end{equation}
+
+\begin{lemma}[Explicit joining diamond]\label{lem:joining-diamond}
+For every parent--child pair $Q,C$, the two displayed Gray edges in the
+appropriate row of~\eqref{eq:ports}, together with two cross-block
+refinement edges, form a four-cycle in $\NCR(n)$.
+\end{lemma}
+
+\begin{proof}
+Let $(a,b)$ be the deleted chord.  In the parent, $a$ and $b$ are free; in
+the child they are the endpoints of one matching chord.  The decoder formula
+\eqref{eq:decode-key} shows that deleting or inserting this chord relabels
+exactly the two key classes based at $a$ and at the common anchor of the two
+points.  Therefore the child mask in the left column is related to the
+parent mask in the same row by one merge.  Flipping the extra Gray coordinate
+shown in that row changes the same key in both blocks, so the second pair is
+again related by the same one-block merge.  These are the two cross edges.
+
+More explicitly, the cross covers in the first case are
+\[
+ P_C(\varnothing)\lessdot P_Q(\{i,j\}),\qquad
+ P_C(\{0\})\lessdot P_Q(\{0,i,j\});
+\]
+in the second case they are
+\[
+ P_C(\varnothing)\lessdot P_Q(\{0,j\}),\qquad
+ P_C(\{0\})\lessdot P_Q(\{0,1,j\});
+\]
+and in the special case they are
+\[
+ P_Q(\varnothing)\lessdot P_C(\varnothing),\qquad
+ P_Q(\{d(Q)-1\})\lessdot P_C(\{d(C)-1\}).
+\]
+Each relation changes exactly one key fiber and hence exactly one block.
+For $1\leq i<j$ the horizontal parent edge flips coordinate $0$; for
+$i=0<j$ with $j\geq2$ it flips coordinate $1$; and for $(i,j)=(0,1)$ it is
+the closing Gray edge.  The child edge is respectively its coordinate-$0$
+edge or closing edge.  Hence the two horizontal pairs are edges of their
+block cycles, and the four vertices form a literal refinement diamond.
+\end{proof}
+
+For bookkeeping, call a Gray edge's \emph{port key} either
+$(q,H)$, meaning ``flip coordinate $q$ above ambient lower mask $H$'', or
+\emph{closing}.  The three rows of~\eqref{eq:ports} give one incoming key in
+the parent and one outgoing key in the child.
+
+\begin{lemma}[Port injection]\label{lem:port-injection}
+For a fixed block $Q$, distinct children are assigned to distinct directed
+edge occurrences of the Gray cycle of $Q$.  If $Q$ is nonroot, its outgoing
+edge occurrence toward $p(Q)$ is not assigned to any child.
+\end{lemma}
+
+\begin{proof}
+A nonclosing Gray edge determines both its flipped coordinate and its lower
+mask, so it realizes at most one coordinate port key.  The closing occurrence
+realizes only the closing key.  In the first row of~\eqref{eq:ports}, the
+pair $(i,j)$ is recovered from the lower mask $\{i,j\}$; in the second, $j$
+is recovered from $\{0,j\}$ and the flipped coordinate distinguishes the
+row; the third row is the unique closing key.  Thus incoming keys of distinct
+children are distinct and each is realized by a directed Gray edge.
+
+For a nonroot $Q$, its outgoing key is the child-side key of its own joining
+diamond.  Comparing the three cases shows that this key differs from every
+incoming child key: a coordinate key differs in coordinate or lower mask,
+and a closing outgoing key occurs only in the special $(0,1)$ case, where
+$Q$ has no child whose first chord could precede that special chord.
+Therefore the chosen outgoing occurrence is not consumed by any child.
+\end{proof}
+
+\section{Recursive square switching}\label{sec:assembly}
+
+We use the elementary square switch: if two disjoint cycles contain opposite
+edges $ab$ and $cd$ of a four-cycle $a b d c a$, deleting $ab,cd$ and adding
+$ac,bd$ produces one cycle on the union of their vertices.  Applying switches
+sequentially is delicate because a parent cycle is modified by its earlier
+children.  The following recursive formulation records exactly which edge
+occurrence remains available.
+
+\begin{lemma}[Block-tree assembly]\label{lem:tree-assembly}
+For every canonical matching $Q$ and even $n$, there is a cycle whose support
+is exactly the union of all Boolean blocks in the subtree rooted at $Q$.
+If $Q$ is nonroot, the cycle retains the outgoing port prescribed by the
+diamond joining $Q$ to $p(Q)$.
+\end{lemma}
+
+\begin{proof}
+Induct on $d(Q)=|F(Q)|$.  Every child has free dimension $d(Q)-2$, so the
+induction is well founded.  By induction each child subtree has one cycle and
+retains its outgoing edge.  Traverse the directed edge occurrences of the
+Gray cycle of $Q$.  At an occurrence assigned to a child, cut the parent
+edge and the retained child edge and insert the two cross edges of
+Lemma~\ref{lem:joining-diamond}; regard the resulting child excursion as one
+path piece.  At an unassigned occurrence, retain the corresponding parent
+vertex as a singleton piece.
+
+The pieces are nonempty paths.  They are pairwise disjoint: different
+Boolean blocks are disjoint by Theorem~\ref{thm:boolean-decomposition}, and
+different child subtrees are disjoint because the parent relation is a tree.
+Their internal adjacencies come from the parent Gray cycle or the inductive
+child cycles, and consecutive pieces are joined by the two cross edges in
+the assigned diamond.  The cyclic last-to-first adjacency is inherited from
+the parent Gray cycle.  Hence flattening the cyclic list of pieces gives a
+single cycle.
+
+Every vertex of the block of $Q$ occurs exactly once, and every child subtree
+occurs exactly once, so the support is the whole subtree.  By
+Lemma~\ref{lem:port-injection}, no child uses the outgoing occurrence of $Q$;
+that edge therefore remains available.  This establishes the inductive
+invariant.
+\end{proof}
+
+\begin{theorem}[Uniform even-order construction]\label{thm:uniform-even}
+For every even $n\geq4$, $\NCR(n)$ has a Hamilton cycle.
+\end{theorem}
+
+\begin{proof}
+Apply Lemma~\ref{lem:tree-assembly} to the empty matching.  By
+Lemma~\ref{lem:canonical-block-tree}, every canonical matching lies in its
+subtree.  By Theorem~\ref{thm:boolean-decomposition}, the corresponding
+Boolean blocks partition all of $\NC(n)$.  The assembled root cycle is
+therefore spanning.  Since $n\geq4$, $|\NC(n)|=\catalan_n\geq3$, so the
+closed spanning walk is a Hamilton cycle in the simple graph.
+\end{proof}
+
+The proof is uniform at $n=4$ and $n=6$; no exhaustive computation is used
+for either order.
+
+\section{Proof of the classification}
+
+\begin{proof}[Proof of Theorem~\ref{thm:classification}]
+For even $n\geq4$, apply Theorem~\ref{thm:uniform-even}.  For odd
+$n\geq3$, apply Theorem~\ref{thm:odd-obstruction}.
+
+It remains to inspect $n<4$.  There is one noncrossing partition for $n=0$
+and one for $n=1$; the formal closed-spanning-walk convention regards each
+singleton graph as Hamiltonian.  For $n=2$, the refinement graph consists of
+one edge on two vertices and has no simple Hamilton cycle.  For $n=3$, the
+odd obstruction applies (equivalently, the five-vertex bipartition is
+unbalanced).  These cases give exactly the stated disjunction.
+\end{proof}
+
+\section{Machine-checked correspondence}\label{sec:formal}
+
+The accompanying Lean~4 package follows the proof above rather than the
+chronology of its discovery.  Table~\ref{tab:lean-map} lists the exact
+declarations consumed by each paper statement.  The file
+\texttt{paper/theorem-map.json} is the machine-readable source of this table,
+and the package checker verifies that every paper label and every declaration
+is present.
+
+\begingroup\small
+\begin{longtable}{p{0.34\textwidth}p{0.55\textwidth}}
+\caption{Paper statements and Lean declarations.}\label{tab:lean-map}\\
+\toprule
+Paper label & Lean declarations\\
+\midrule
+\endfirsthead
+\toprule
+Paper label & Lean declarations\\
+\midrule
+\endhead
+\leanname{lem:bipartite} &
+\leanname{NCRefinementGraph_isBipartite}\\
+\leanname{thm:signed-count} &
+\leanname{signedDyckSumTree_closed_form},
+\leanname{signedNCCount_univ_eq_signedDyckSumTree}\\
+\leanname{thm:odd-obstruction} &
+\leanname{NCRefinementGraph_fin_odd_geq3_not_isHamiltonian}\\
+\leanname{lem:key-fibers} &
+\leanname{commonKey_root_or_chord}, \leanname{point_in_chord_hull},
+\leanname{point_avoids_nested_chord}, \leanname{root_point_avoids_chord}\\
+\leanname{thm:boolean-decomposition} &
+\leanname{decodeState_bijective}, \leanname{stateEquivNC},
+\leanname{decodedNC_mergesTo_insert}\\
+\leanname{lem:block-gray-cycle} &
+\leanname{rankGrayCycle}, \leanname{rankGrayVertices_nodup},
+\leanname{rankGrayVertices_chain}\\
+\leanname{lem:canonical-block-tree} &
+\leanname{parent_card}, \leanname{parentOption_eq_none_iff},
+\leanname{inSubtree_root}\\
+\leanname{lem:joining-diamond} &
+\leanname{joiningDiamond_nonempty}, \leanname{joiningDiamond}\\
+\leanname{lem:port-injection} &
+\leanname{portAssignedToPair_exists}, \leanname{assignedPair_injective},
+\leanname{outgoingPair_not_assigned}\\
+\leanname{lem:tree-assembly} &
+\leanname{EdgePieceSystem.toCycleCode}, \leanname{subtreeCycle},
+\leanname{rootCycleCode_support}\\
+\leanname{thm:uniform-even} &
+\leanname{NCRefinementGraph_fin_even_geq4_isHamiltonian_petersen}\\
+\leanname{thm:classification} &
+\leanname{NCRefinementGraph_fin_isHamiltonian_iff}\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+The publication root is \texttt{Hamilton.HamiltonianCycles}.  The command
+\texttt{lake env lean Hamilton/HamiltonianCyclesAxiomAudit.lean} reports for
+the uniform even theorem, the odd obstruction, and the complete
+classification exactly
+\[
+ \texttt{[propext, Classical.choice, Quot.sound]}.
+\]
+These are standard Lean/Mathlib logical dependencies.  No project axiom,
+\texttt{sorry}, \texttt{admit}, or \texttt{native\_decide} occurs in the
+publication dependency closure.
+
+\section{Concluding remarks}
+
+The obstruction and construction meet exactly.  Odd orders fail for the
+global reason forced by the bipartition sizes.  Even orders admit a cycle
+because every Petersen block has odd Boolean dimension and because the
+lexicographic chord tree admits conflict-free explicit joining ports.  The
+central point is that the proof never asks for a Hamilton path with arbitrary
+prescribed endpoints inside an opaque fiber.  Instead, its endpoints are
+fixed Gray edges, and the cross-block edges are constructed together with
+those ports in a literal refinement diamond.
+
+\ifnum\blindmode=0
+\subsection*{Acknowledgements}
+The author thanks the developers of Lean and Mathlib for the formalization
+environment.
+\fi
+
+\begin{thebibliography}{20}
+
+\bibitem{HHMW}
+E.~Hartung, H.~P.~Hoang, T.~M\"utze, and A.~Williams,
+Combinatorial generation via permutation languages. I. Fundamentals,
+\emph{Trans. Amer. Math. Soc.} \textbf{375} (2022), 2255--2291;
+\arxiv{1906.06069}.
+
+\bibitem{HHNP}
+C.~Huemer, F.~Hurtado, M.~Noy, and E.~Oma\~na-Pulido,
+Gray codes for non-crossing partitions and dissections of a convex polygon,
+\emph{Discrete Appl. Math.} \textbf{157} (2009), 1509--1520.
+
+\bibitem{HM}
+H.~P.~Hoang and T.~M\"utze,
+Combinatorial generation via permutation languages. II. Lattice congruences,
+\emph{Israel J. Math.} \textbf{244} (2021), 359--417;
+\arxiv{1911.12078}.
+
+\bibitem{K}
+G.~Kreweras,
+Sur les partitions non crois\'ees d'un cycle,
+\emph{Discrete Math.} \textbf{1} (1972), 333--350.
+
+\bibitem{MNW}
+A.~Merino, Namrata, and A.~Williams,
+On the hardness of Gray code problems for combinatorial objects,
+preprint, 2024; \arxiv{2401.14963}.
+
+\bibitem{M}
+T.~M\"utze,
+Combinatorial Gray codes---an updated survey,
+\emph{Electron. J. Combin.} \textbf{DS26} (2024);
+\arxiv{2202.01280}.
+
+\bibitem{Pet}
+T.~K.~Petersen,
+On the shard intersection order of a Coxeter group,
+\emph{SIAM J. Discrete Math.} \textbf{27} (2013), 1880--1912;
+\arxiv{1108.5761}.
+
+\bibitem{S}
+R.~Simion,
+Noncrossing partitions,
+\emph{Discrete Math.} \textbf{217} (2000), 367--409.
+
+\bibitem{SU}
+R.~Simion and D.~Ullman,
+On the structure of the lattice of noncrossing partitions,
+\emph{Discrete Math.} \textbf{98} (1991), 193--206.
+
+\end{thebibliography}
+
+\end{document}

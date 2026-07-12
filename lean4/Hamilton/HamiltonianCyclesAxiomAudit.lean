@@ -1,0 +1,9 @@
+import Hamilton.HamiltonianCycles
+
+open Hamilton.Infrastructure
+
+#print axioms NC.NCRefinementGraph_fin_even_geq8_isHamiltonian
+#print axioms NC.NCRefinementGraph_fin_even_geq4_isHamiltonian_petersen
+#print axioms NC.NCRefinementGraph_fin_even_geq4_isHamiltonian_proved
+#print axioms NC.NCRefinementGraph_fin_odd_geq3_not_isHamiltonian
+#print axioms NC.NCRefinementGraph_fin_isHamiltonian_iff

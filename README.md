@@ -1,73 +1,54 @@
 # Hamilton Cycles in the Noncrossing Partition Refinement Graph
 
-[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.18957708-blue?style=flat-square&logo=zenodo)](https://doi.org/10.5281/zenodo.18957708)
-[![Status](https://img.shields.io/badge/status-under%20review%20(EJC)-yellow?style=flat-square)](https://www.combinatorics.org/)
+This repository contains the manuscript and a Lean 4 formalization of its
+complete classification theorem.
 
-Companion code for the paper:
+## Main result
 
-> **Hamilton Cycles in the Noncrossing Partition Refinement Graph**
-> Alex Chengyu Li, 2026
->
-> Under review at *Electronic Journal of Combinatorics*
+For every natural number `n`, the noncrossing partition refinement graph is
+Hamiltonian exactly when `n = 0`, `n = 1`, or `n` is even and `n >= 4`.
+For the usual range `n >= 3`, this is equivalent to `n` being even.
 
-## Interactive Proof Explorer
+## Contents
 
-An interactive visualization of the minimum degree theorem (Theorem 3) is available at:
+- `paper/gray_code_evolution.tex`: manuscript source.
+- `paper/Li_Gray_Code_Evolution_2026.pdf`: public manuscript PDF.
+- `paper/Anonymous_Gray_Code_Evolution_2026.pdf`: blind manuscript PDF.
+- `paper/theorem-map.json`: exact paper-label to Lean-declaration map.
+- `lean4/`: minimal transitive Lean source closure with semantic module names.
 
-**[proof-explorer.html](https://crabsatellite.github.io/gray-code-evolution/proof-explorer.html)**
+The formal source tree contains only modules required by the publication
+entrypoints. Research logs, abandoned approaches, generated caches, and
+finite-search programs are not part of this repository.
 
-## Quick start
+## Proof architecture
 
-```bash
-pip install numpy
-python verify_all.py
+The odd case is excluded by block-count bipartiteness and an exact signed
+count of noncrossing partitions. The even case uses canonical
+matching/Boolean-mask coordinates, cyclic Gray codes inside each Boolean
+block, a rooted tree of canonical matchings, explicit joining diamonds, and
+recursive square switching. The theorem for all natural numbers is
+`NCRefinementGraph_fin_isHamiltonian_iff`.
+
+## Verification
+
+```powershell
+cd lean4
+lake build Hamilton.HamiltonianCycles
+lake env lean Hamilton/HamiltonianCyclesTheoremMap.lean
+lake env lean Hamilton/HamiltonianCyclesAxiomAudit.lean
+python scripts/render_publication_readme.py --check
 ```
 
-This verifies all results from the paper in a few minutes (n ≤ 12).
-For the full verification including n = 14 (takes hours):
+The expected audit output for every publication endpoint is exactly
+`[propext, Classical.choice, Quot.sound]`. No project axiom or proof escape is
+present in the publication closure.
 
-```bash
-python verify_all.py --full
-```
+Use the pinned manifest directly; do not run `lake update`. On Windows,
+extract this package to a short path such as `C:\gray-proof` so Mathlib's
+longest source paths remain below the Win32 path limit.
 
-## What is verified
+## Licensing
 
-| Claim                                                    | Script                 | Time    |
-| -------------------------------------------------------- | ---------------------- | ------- |
-| Theorem 1: N\_{2m+1}(−1) = (−1)^{m+1} C_m for n = 2..100 | `verify_all.py`        | < 1s    |
-| Table 1: Bipartite class counts for n = 2..30            | `verify_all.py`        | < 1s    |
-| Table 2: Graph statistics for NC_R(n), n = 4..12         | `verify_all.py`        | minutes |
-| Hamilton cycles for even n = 4, 6, 8, 10, 12             | `verify_all.py`        | minutes |
-| Hamilton cycle for n = 14 (2,674,440 vertices)           | `verify_all.py --full` | hours   |
-
-## Structure
-
-```
-src/
-  narayana.py       Narayana numbers, parity identity, bipartite counts
-  noncrossing.py    Generate noncrossing partitions, build NC_R(n)
-  hamilton.py       Warnsdorff's heuristic + Posa rotation-closure
-verify_all.py       One-click verification of all paper results
-data/results/       Pre-computed cycle metadata for each even n
-```
-
-## Requirements
-
-- Python ≥ 3.9
-- NumPy ≥ 1.24 (only needed for `--full`)
-
-## Citation
-
-```bibtex
-@article{li2026hamilton,
-  title   = {Hamilton Cycles in the Noncrossing Partition Refinement Graph},
-  author  = {Li, Alex Chengyu},
-  year    = {2026},
-  doi     = {10.5281/zenodo.18957708},
-  note    = {Under review at Electronic Journal of Combinatorics}
-}
-```
-
-## License
-
-MIT
+See `LICENSE.md`. Lean source and verification scripts are Apache-2.0; the
+manuscript is CC BY-ND 4.0.
