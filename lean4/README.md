@@ -38,8 +38,8 @@ bipartite-imbalance proof, not by enumeration.
 
 ## Verification
 
-The toolchain is pinned in `lean-toolchain`. First builds may take several
-minutes because the `n = 6` certificate contains 132 explicit vertices.
+The toolchain is pinned in `lean-toolchain`. A first build may take several
+minutes while Lean compiles the complete transitive proof dependency set.
 
 ```powershell
 lake build Hamilton.Infrastructure.HamiltonianClassification
