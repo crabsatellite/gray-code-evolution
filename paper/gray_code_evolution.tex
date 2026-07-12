@@ -70,6 +70,20 @@ Its cover graph $\NCR(n)$ has vertex set $\NC(n)$; two vertices are adjacent
 when one is obtained from the other by merging exactly two blocks, with the
 result still noncrossing.
 
+\paragraph{Why these are precisely the cover edges.}
+The Kreweras lattice is graded by
+\[
+ \rho(\pi)=n-b(\pi),
+\]
+where $b(\pi)$ is the number of blocks.  If $\sigma$ is obtained from $\pi$
+by merging two blocks, then $\pi<\sigma$ and
+$\rho(\sigma)=\rho(\pi)+1$, so no lattice element can lie strictly between
+them.  Conversely, a cover raises the rank by one.  Since every block of a
+coarsening is a union of blocks of the finer partition, lowering the number
+of blocks by one can only replace two blocks by their union.  Thus the
+merge/split adjacency used below is exactly the cover relation, rather than
+a larger auxiliary graph.
+
 The adjacency here is not the element-transfer adjacency in the cyclic Gray
 code of Huemer, Hurtado, Noy, and Oma\~na-Pulido~\cite{HHNP}.  The general
 permutation-language results of Hartung--Hoang--M\"utze--Williams and
@@ -346,36 +360,76 @@ refinement edges, form a four-cycle in $\NCR(n)$.
 \end{lemma}
 
 \begin{proof}
-Let $(a,b)$ be the deleted chord.  In the parent, $a$ and $b$ are free; in
-the child they are the endpoints of one matching chord.  The decoder formula
-\eqref{eq:decode-key} shows that deleting or inserting this chord relabels
-exactly the two key classes based at $a$ and at the common anchor of the two
-points.  Therefore the child mask in the left column is related to the
-parent mask in the same row by one merge.  Flipping the extra Gray coordinate
-shown in that row changes the same key in both blocks, so the second pair is
-again related by the same one-block merge.  These are the two cross edges.
+Write the free points of the parent as
+$u_0<u_1<\cdots<u_{d(Q)-1}$, and let the deleted chord be
+$(u_i,u_j)$.  The free points of the child are the remaining $u_r$'s, in the
+same order.  If $B$ is a child mask, let $\widehat B$ be its order-preserving
+lift to the parent coordinates.  Except in the special third row, the parent
+mask paired with $B$ is
+\begin{equation}\label{eq:parent-mask}
+ M(B)=\widehat B\cup\{i,j\}.
+\end{equation}
+The decoder gives a direct comparison.  In the child, $u_i$ and $u_j$ are
+the endpoints of one matching chord and hence have the same decoded key.  In
+the parent they are free, and selecting both in $M(B)$ sends them to their
+common containing anchor.  All other selected points have the same anchor
+before and after the order-preserving lift, while every unselected free point
+keeps its own key.  More precisely, if $r$ is the anchor of $u_i$ after the
+chord is deleted, then
+\[
+ \kappa_{Q,M(B)}(x)=
+ \begin{cases}
+  r,&\kappa_{C,B}(x)=u_i,\\
+  \kappa_{C,B}(x),&\kappa_{C,B}(x)\neq u_i.
+ \end{cases}
+\]
+Here $r<u_i$, so the child fibers with keys $r$ and $u_i$ are distinct.
+Thus $P_Q(M(B))$ is obtained from $P_C(B)$ by replacing precisely those two
+fibers by their union, and the pair is joined by one cover edge.
 
-More explicitly, the cross covers in the first case are
+We now verify that the four masks in each row of~\eqref{eq:ports} are the
+ones just described and that the horizontal pairs are Gray edges.
+
+If $i>0$, the least child free point lifts to $u_0$.  Hence
+\[
+ M(\varnothing)=\{i,j\},\qquad
+ M(\{0\})=\{0,i,j\}.
+\]
+The parent pair flips coordinate $0$, and the child pair
+$\varnothing,\{0\}$ also flips coordinate $0$.  The cross covers are
 \[
  P_C(\varnothing)\lessdot P_Q(\{i,j\}),\qquad
  P_C(\{0\})\lessdot P_Q(\{0,i,j\});
 \]
-in the second case they are
+these are the first row.
+
+If $i=0$ and $j\geq2$, the least child free point lifts to $u_1$.  Thus
+\[
+ M(\varnothing)=\{0,j\},\qquad
+ M(\{0\})=\{0,1,j\}.
+\]
+The parent pair flips coordinate $1$, while the child pair again flips its
+coordinate $0$.  The cross covers are
 \[
  P_C(\varnothing)\lessdot P_Q(\{0,j\}),\qquad
  P_C(\{0\})\lessdot P_Q(\{0,1,j\});
 \]
-and in the special case they are
+these are the second row.
+
+Finally suppose $(i,j)=(0,1)$.  Here the two selected horizontal edges are
+the closing Gray edges.  The rightmost child free point lifts to the
+rightmost parent free point.  Directly from~\eqref{eq:decode-key}, inserting
+the chord merges exactly the two endpoint fibers both at the empty mask and
+at the rightmost singleton mask.  Hence the cross covers are
 \[
  P_Q(\varnothing)\lessdot P_C(\varnothing),\qquad
  P_Q(\{d(Q)-1\})\lessdot P_C(\{d(C)-1\}).
 \]
-Each relation changes exactly one key fiber and hence exactly one block.
-For $1\leq i<j$ the horizontal parent edge flips coordinate $0$; for
-$i=0<j$ with $j\geq2$ it flips coordinate $1$; and for $(i,j)=(0,1)$ it is
-the closing Gray edge.  The child edge is respectively its coordinate-$0$
-edge or closing edge.  Hence the two horizontal pairs are edges of their
-block cycles, and the four vertices form a literal refinement diamond.
+The two horizontal pairs are the closing edges in their respective block
+cycles.  In all three cases the four vertices are distinct across the two
+Boolean blocks, both horizontal pairs are fixed block-cycle edges, and both
+vertical pairs are single merges.  They therefore form the required literal
+four-cycle.
 \end{proof}
 
 For bookkeeping, call a Gray edge's \emph{port key} either
@@ -390,20 +444,38 @@ edge occurrence toward $p(Q)$ is not assigned to any child.
 \end{lemma}
 
 \begin{proof}
-A nonclosing Gray edge determines both its flipped coordinate and its lower
-mask, so it realizes at most one coordinate port key.  The closing occurrence
-realizes only the closing key.  In the first row of~\eqref{eq:ports}, the
-pair $(i,j)$ is recovered from the lower mask $\{i,j\}$; in the second, $j$
-is recovered from $\{0,j\}$ and the flipped coordinate distinguishes the
-row; the third row is the unique closing key.  Thus incoming keys of distinct
-children are distinct and each is realized by a directed Gray edge.
+Record a nonclosing directed Gray occurrence by a pair $(q,H)$, where $q$ is
+the flipped ambient point and $H$ is the lower ambient mask.  Equality of two
+such keys forces equality of both $q$ and $H$; the closing occurrence is a
+separate key.
 
-For a nonroot $Q$, its outgoing key is the child-side key of its own joining
-diamond.  Comparing the three cases shows that this key differs from every
-incoming child key: a coordinate key differs in coordinate or lower mask,
-and a closing outgoing key occurs only in the special $(0,1)$ case, where
-$Q$ has no child whose first chord could precede that special chord.
-Therefore the chosen outgoing occurrence is not consumed by any child.
+Let $C$ be a child of $Q$, with first chord $e=(u_i,u_j)$.  The parent-side
+key supplied by~\eqref{eq:ports} is
+\[
+ \begin{cases}
+  (u_0,\{u_i,u_j\}),&i>0,\\
+  (u_1,\{u_0,u_j\}),&i=0,\ j\geq2,\\
+  \text{closing},&(i,j)=(0,1).
+ \end{cases}
+\]
+In each of the first two cases the lower mask is exactly the two-element
+endpoint set of $e$.  Because the endpoints are ordered increasingly, that
+set uniquely recovers the ordered chord.  The child itself is then recovered
+as $Q\cup\{e\}$.  Thus two equal coordinate keys come from the same child.
+If both keys are closing, both first chords join the first two free points of
+$Q$, so again the chords and children coincide.  A coordinate key cannot
+equal the closing key.  This proves injectivity.
+
+It remains to check that the edge retained for the parent of $Q$ is not used
+by a child of $Q$.  If the outgoing key is a coordinate key, its lower mask
+is $\varnothing$, whereas every incoming coordinate key has lower mask
+$\{u_i,u_j\}\neq\varnothing$; an incoming closing key has a different key
+type.  If the outgoing key is closing, the first chord of $Q$ joins its first
+two parent-free points.  Any child chord would have both endpoints to the
+right of that chord, but would also have to be lexicographically no later
+than it in order to become the child's first chord, a contradiction.  Hence
+in this special case $Q$ has no children at all.  The outgoing occurrence is
+therefore unassigned in every case.
 \end{proof}
 
 \section{Recursive square switching}\label{sec:assembly}
@@ -423,29 +495,56 @@ diamond joining $Q$ to $p(Q)$.
 \end{lemma}
 
 \begin{proof}
-Induct on $d(Q)=|F(Q)|$.  Every child has free dimension $d(Q)-2$, so the
-induction is well founded.  By induction each child subtree has one cycle and
-retains its outgoing edge.  Traverse the directed edge occurrences of the
-Gray cycle of $Q$.  At an occurrence assigned to a child, cut the parent
-edge and the retained child edge and insert the two cross edges of
-Lemma~\ref{lem:joining-diamond}; regard the resulting child excursion as one
-path piece.  At an unassigned occurrence, retain the corresponding parent
-vertex as a singleton piece.
+We prove simultaneously the following three assertions for the subtree at
+$Q$:
+\begin{enumerate}
+\item there is one simple cycle $Z_Q$;
+\item its support is exactly the union of the Boolean blocks in the subtree;
+\item if $Q$ is nonroot, the prescribed outgoing directed edge of the block
+cycle of $Q$ is still an edge of $Z_Q$.
+\end{enumerate}
+Induct on $d(Q)=|F(Q)|$.  A child is obtained by adding one chord and hence
+has dimension $d(Q)-2$, so this is a well-founded induction.  Assume the
+three assertions for every child.
 
-The pieces are nonempty paths.  They are pairwise disjoint: different
-Boolean blocks are disjoint by Theorem~\ref{thm:boolean-decomposition}, and
-different child subtrees are disjoint because the parent relation is a tree.
-Their internal adjacencies come from the parent Gray cycle or the inductive
-child cycles, and consecutive pieces are joined by the two cross edges in
-the assigned diamond.  The cyclic last-to-first adjacency is inherited from
-the parent Gray cycle.  Hence flattening the cyclic list of pieces gives a
-single cycle.
+Write the cyclic Gray list of the block of $Q$ as
+$v_0,v_1,\ldots,v_{r-1}$, with indices modulo $r$, and regard
+$e_k=(v_k,v_{k+1})$ as a directed edge occurrence.  By
+Lemma~\ref{lem:port-injection}, each child is assigned to a distinct $e_k$.
+For an unassigned occurrence $e_k$, define the corresponding piece to be the
+singleton list $[v_k]$.  For an occurrence assigned to a child $C$, the
+inductive cycle $Z_C$ still contains its prescribed outgoing edge $ab$.
+The joining diamond has opposite edges $e_k$ and $ab$.  Delete those two
+edges and use the two cross edges of the diamond.  Cutting $Z_C$ at $ab$
+turns it into a path through every vertex of the child subtree; adjoining
+$v_k$ and the two cross edges gives a path piece whose entry is $v_k$ and
+whose exit is adjacent to $v_{k+1}$.  Thus every piece associated with
+$e_k$ starts at the source of $e_k$ and hands off to the source of
+$e_{k+1}$.
 
-Every vertex of the block of $Q$ occurs exactly once, and every child subtree
-occurs exactly once, so the support is the whole subtree.  By
-Lemma~\ref{lem:port-injection}, no child uses the outgoing occurrence of $Q$;
-that edge therefore remains available.  This establishes the inductive
-invariant.
+We verify that concatenation introduces neither omissions nor repetitions.
+The vertices $v_k$ are distinct because the block Gray list is a cyclic
+listing.  A child-subtree piece contains no vertex in the block of $Q$:
+the canonical matching of every one of its vertices lies strictly below that
+child in the matching tree, whereas the vertices $v_k$ have canonical
+matching exactly $Q$.  Two different child-subtree pieces are disjoint
+because a rooted tree has disjoint subtrees below distinct children.
+Finally, port injectivity ensures that no child subtree is inserted twice.
+Therefore all pieces are nonempty, internally simple, and pairwise disjoint.
+
+Their internal edges are either edges of a cut child cycle or one of the two
+cross edges in its joining diamond.  The exit of the $k$th piece is adjacent
+to $v_{k+1}$, the head of the next piece; the final piece hands off to $v_0$
+in exactly the same way.  Flattening the cyclic sequence of pieces is thus a
+single simple cycle.
+
+Every vertex in the block of $Q$ occurs as exactly one $v_k$.  Every proper
+descendant belongs to the subtree of a unique child, and that entire child
+subtree occurs in the unique piece assigned to that child.  The support is
+therefore exactly the subtree of $Q$.  If $Q$ is nonroot, its outgoing
+occurrence is unassigned by Lemma~\ref{lem:port-injection}; its piece is the
+singleton $[v_k]$, so the handoff edge $v_kv_{k+1}$ remains present in the
+flattened cycle.  This proves the third assertion and closes the induction.
 \end{proof}
 
 \begin{theorem}[Uniform even-order construction]\label{thm:uniform-even}
@@ -544,9 +643,10 @@ These are standard Lean/Mathlib logical dependencies.  No project axiom,
 \texttt{sorry}, \texttt{admit}, or \texttt{native\_decide} occurs in the
 publication dependency closure.
 
-The immutable technical archive corresponding to version~v1.0.0 of the
-manuscript and formalization is available at
-\doi{10.5281/zenodo.21316751}.
+The kernel-checked formalization and the initial technical manuscript
+snapshot were archived as version~v1.0.0 at
+\doi{10.5281/zenodo.21316751}.  The present manuscript revision adds
+expository proof detail without changing any formal statement or Lean source.
 
 \section{Concluding remarks}
 
