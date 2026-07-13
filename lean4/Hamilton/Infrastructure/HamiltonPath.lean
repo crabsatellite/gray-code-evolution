@@ -201,8 +201,7 @@ theorem not_isHamiltonian_of_colorable_two_odd [Fintype α]
 G.Walk a b`, `idxOf (p.getVert i) p.support = i` whenever `i ≤
 p.length`.
 
-Pure Mathlib-quality generic graph theory; underpins the
-Pósa rotated-walk construction. -/
+This lemma is used in the Pósa rotated-walk construction. -/
 theorem idxOf_getVert_eq_of_isPath {V : Type*} [DecidableEq V]
     {G : SimpleGraph V} {a b : V} {p : G.Walk a b}
     (hp : p.IsPath) (i : ℕ) (hi : i ≤ p.length) :
@@ -370,7 +369,7 @@ theorem HamiltonianPathBetween.isHamiltonian_of_adj {α : Type*}
   obtain ⟨p, hp_ham⟩ := hp
   exact Walk.IsHamiltonian.isHamiltonian_of_adj_endpoints hcard hp_ham hadj
 
-/-! ### Hamilton-laceability (generic, Mathlib-quality)
+/-! ### Hamilton-laceability
 
 A `Coloring α`-laceable graph has a Hamilton path between every pair
 of differently-colored vertices.  When the graph is connected on ≥ 3
@@ -383,22 +382,16 @@ laceable Hamilton path closes via the edge. -/
 `c`) iff every pair of differently-colored vertices is connected by
 a Hamilton path.
 
-The cleanest formulation: parameterized by a `Bool`-valued coloring.
-Generalizes the bipartite Hamilton-laceability conjecture (paper
-Conjecture `conj:hampath` for NCR). -/
+We formulate laceability relative to a `Bool`-valued proper coloring. -/
 def IsHamiltonianLaceable {α : Type*} [DecidableEq α] (G : SimpleGraph α)
     (c : G.Coloring Bool) : Prop :=
   ∀ a b : α, c a ≠ c b → G.HamiltonianPathBetween a b
 
 /-- **Laceable + connected + size ≥ 3 ⇒ Hamilton cycle**.
 
-Pure graph theory: pick any edge (exists by connectivity on ≥ 2
-vertices); its endpoints are oppositely colored (every edge in a
-proper coloring); laceability gives a Hamilton path between them;
-close with the edge.
-
-This is the generic Mathlib-quality version of paper Conjecture
-`conj:hampath` ⇒ paper Conjecture `conj:main`. -/
+Pick any edge, which exists by connectivity on at least two vertices.
+Its endpoints have different colors, laceability supplies a Hamilton path
+between them, and the edge closes that path to a Hamilton cycle. -/
 theorem IsHamiltonianLaceable.isHamiltonian {α : Type*} [DecidableEq α]
     [Fintype α] {G : SimpleGraph α} {c : G.Coloring Bool}
     (h_conn : G.Connected) (h_card3 : 3 ≤ Fintype.card α)

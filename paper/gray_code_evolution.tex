@@ -103,16 +103,17 @@ Gray code does not settle the problem considered here.  The general
 permutation-language results of Hartung--Hoang--M\"utze--Williams and
 Hoang--M\"utze~\cite{HHMW,HM} provide Hamilton paths for many quotient
 graphs, but do not identify the refinement cover graph with such a quotient.
-Merino, Namrata, and Williams~\cite{MNW} consider the algorithmic problem in
-which the input is an arbitrary list of noncrossing partitions and one asks
-whether the list admits a refinement Gray code; they prove that this decision
-problem is NP-complete.  That arbitrary-sublist problem is different from the
-spanning-cycle problem for the full lattice considered here.  Nevertheless,
-our classification and signed enumeration completely resolve its canonical
-full-family instances: all noncrossing partitions of $[n]$ admit a refinement
-Gray code if and only if $n\leq3$ or $n$ is even, and for even $n\geq4$ the
-Gray code may be chosen cyclically.  For broader background on combinatorial
-Gray codes and their Hamiltonian formulations, see M\"utze's survey~\cite{M}.
+Given a finite list $L$ of distinct elements of $\NC(n)$, a refinement Gray
+code for $L$ is an ordering of all entries of $L$, each used once, such that
+consecutive partitions are adjacent in $\NCR(n)$.  Merino, Namrata, and
+Williams~\cite{MNW} prove that deciding whether an arbitrary input list $L$
+admits such an ordering is NP-complete.  Their arbitrary-list problem differs
+from the full-family input $L=\NC(n)$.  Corollary~\ref{cor:hamilton-paths}
+shows that this full-family input admits a refinement Gray code if and only if
+$n\leq3$ or $n$ is even.  For even $n\geq4$, the ordering may be chosen
+cyclically, meaning that its last and first entries are also adjacent.  For
+broader background on combinatorial Gray codes and their Hamiltonian
+formulations, see M\"utze's survey~\cite{M}.
 
 Petersen~\cite{Pet} constructed a symmetric Boolean decomposition of the
 noncrossing partition lattice using valley hopping.  Here the corresponding
@@ -951,11 +952,10 @@ foundational dependencies just listed.  The correspondence between those
 definitions and the mathematical objects in the paper is part of the
 mathematical exposition.
 
-The comparison with the refinement Gray-code problem of Merino, Namrata, and
-Williams is a literature-level identification, not an additional formal
-theorem.  Lean formalizes the merge/split adjacency and the Hamilton-path
-classification; the identification with their externally stated list problem
-uses the definition in the cited work.
+The Lean development proves the merge/split adjacency and the cycle and path
+classifications for the full family $\NC(n)$.  It does not formalize the
+arbitrary-list decision problem of Merino, Namrata, and Williams; the
+comparison above follows directly from their definition.
 
 \ifnum\blindmode=0
 Archive concept DOI:
