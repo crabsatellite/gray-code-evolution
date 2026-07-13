@@ -73,5 +73,10 @@
     "label": "thm:classification",
     "title": "Complete Hamiltonicity classification for every natural n",
     "lean": ["NCRefinementGraph_fin_isHamiltonian_iff"]
+  },
+  {
+    "label": "cor:hamilton-paths",
+    "title": "Complete Hamilton-path classification for every natural n",
+    "lean": ["NCRefinementGraph_fin_zero_isHamiltonianPath", "NCRefinementGraph_fin_one_isHamiltonianPath", "NCRefinementGraph_fin_two_isHamiltonianPath", "NCRefinementGraph_fin_three_isHamiltonianPath", "cardThree_hamiltonianPath_between_twoBlock", "IsHamiltonian.isHamiltonianPath", "NCRefinementGraph_evenBlocks_oddBlocks_diff_at_most_one_of_isHamiltonianPath", "NCRefinementGraph_fin_odd_geq5_not_isHamiltonianPath", "NCRefinementGraph_fin_isHamiltonianPath_iff"]
   }
 ]

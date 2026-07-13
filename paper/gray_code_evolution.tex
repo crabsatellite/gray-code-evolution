@@ -21,7 +21,7 @@
   \newcommand{\blindmode}{1}
 \fi
 
-\title{Hamilton Cycles in the Noncrossing Partition Refinement Graph}
+\title{Hamilton Cycles and Paths in the Noncrossing Partition Refinement Graph}
 
 \ifnum\blindmode=1
   \author{Anonymous}
@@ -43,26 +43,28 @@
 Let $\NCR(n)$ be the cover graph of the refinement order on the
 noncrossing partitions of an $n$-element cyclically ordered set.  Thus an
 edge merges two blocks, or reverses such a merge by splitting one block.
-We determine exactly when this graph has a Hamilton cycle.  For odd
-$n\geq3$, block-count parity is a bipartition and a signed Dyck-tree
-recurrence gives color-class difference
-$(-1)^{m+1}\catalan_m$ at $n=2m+1$, so a Hamilton cycle is impossible.
-For every even $n\geq4$, we give one uniform construction.  A noncrossing
-partition is encoded bijectively by a noncrossing partial matching $Q$ and a
-Boolean mask on the unmatched nonroot points.  Each fixed $Q$ is therefore
-an odd-dimensional hypercube and carries a cyclic reflected Gray code.
-Deleting the lexicographically first chord makes the matchings into a rooted
-tree.  For every tree edge we exhibit an explicit refinement diamond; an
-injective port assignment makes all selected directed cube-edge occurrences
-distinct.  Recursive square switching then joins all Boolean cycles into one
-Hamilton cycle.  If a one-vertex graph is regarded as Hamiltonian via its
-constant closed spanning walk, the complete classification for all natural
-$n$ is
+We determine exactly when this graph has a Hamilton cycle and when it has a
+Hamilton path.  If a one-vertex graph is regarded as Hamiltonian via its
+constant closed spanning walk, the cycle classification for all natural $n$
+is
 \[
  \NCR(n)\text{ is Hamiltonian}
  \quad\Longleftrightarrow\quad
  n\in\{0,1\}\ \text{or}\ (n\text{ is even and }n\geq4).
 \]
+With the analogous convention for a one-vertex path, $\NCR(n)$ has a Hamilton
+path exactly when $n\leq3$ or $n$ is even.  For odd $n=2m+1$, block-count
+parity is a bipartition, and a signed Dyck-tree recurrence gives color-class
+difference $(-1)^{m+1}\catalan_m$.  This rules out Hamilton cycles for odd
+$n\geq3$ and Hamilton paths for odd $n\geq5$; the remaining small orders are
+handled directly.  For every even $n\geq4$, we give a uniform Hamilton-cycle
+construction.  A noncrossing partition is encoded bijectively by a
+noncrossing partial matching $Q$ and a Boolean mask on the unmatched nonroot
+points.  Each fixed $Q$ is an odd-dimensional hypercube with a cyclic
+reflected Gray code.  Deleting the lexicographically first chord makes the
+matchings into a rooted tree.  Explicit refinement diamonds and an injective
+port assignment allow recursive square switching to join all Boolean cycles
+into one Hamilton cycle.
 \end{abstract}
 
 \section{Introduction}
@@ -101,10 +103,16 @@ Gray code does not settle the problem considered here.  The general
 permutation-language results of Hartung--Hoang--M\"utze--Williams and
 Hoang--M\"utze~\cite{HHMW,HM} provide Hamilton paths for many quotient
 graphs, but do not identify the refinement cover graph with such a quotient.
-The arbitrary-sublist refinement Gray-code problem considered by Merino,
-Namrata, and Williams~\cite{MNW} is also different from the spanning cycle
-problem for the full lattice.  For broader background on combinatorial Gray
-codes and their Hamiltonian formulations, see M\"utze's survey~\cite{M}.
+Merino, Namrata, and Williams~\cite{MNW} consider the algorithmic problem in
+which the input is an arbitrary list of noncrossing partitions and one asks
+whether the list admits a refinement Gray code; they prove that this decision
+problem is NP-complete.  That arbitrary-sublist problem is different from the
+spanning-cycle problem for the full lattice considered here.  Nevertheless,
+our classification and signed enumeration completely resolve its canonical
+full-family instances: all noncrossing partitions of $[n]$ admit a refinement
+Gray code if and only if $n\leq3$ or $n$ is even, and for even $n\geq4$ the
+Gray code may be chosen cyclically.  For broader background on combinatorial
+Gray codes and their Hamiltonian formulations, see M\"utze's survey~\cite{M}.
 
 Petersen~\cite{Pet} constructed a symmetric Boolean decomposition of the
 noncrossing partition lattice using valley hopping.  Here the corresponding
@@ -131,8 +139,31 @@ Consequently, in the usual nondegenerate range $n\geq3$, $\NCR(n)$ has a
 Hamilton cycle if and only if $n$ is even.
 \end{theorem}
 
-Sections~\ref{sec:odd} and~\ref{sec:coordinates}--\ref{sec:assembly} prove
-the two directions.
+\begin{corollary}[Hamilton paths]\label{cor:hamilton-paths}
+Regard a one-vertex graph as having a Hamilton path of length zero.  Then, for
+every $n\in\mathbb N$,
+\[
+ \NCR(n)\text{ has a Hamilton path}
+ \quad\Longleftrightarrow\quad
+ n\leq3\ \text{or}\ n\text{ is even}.
+\]
+\end{corollary}
+
+\begin{proof}
+For $n=0,1$ the graph has one vertex, and for $n=2$ it is a single edge.  For
+$n=3$, there are three two-block partitions, each adjacent to both the
+one-block and three-block partitions, so alternating through these five
+vertices gives a Hamilton path.  If
+$n\geq4$ is even, Theorem~\ref{thm:classification} gives a Hamilton cycle,
+and deleting one edge gives a Hamilton path.  Finally, let $n=2m+1\geq5$.
+By Theorem~\ref{thm:signed-count}, the two block-parity classes differ in
+size by $\catalan_m\geq2$.  A path in a bipartite graph alternates between
+the two classes, so no Hamilton path can exist.
+\end{proof}
+
+Theorem~\ref{thm:classification} is proved in Sections~\ref{sec:odd}
+and~\ref{sec:coordinates}--\ref{sec:assembly}, which establish its two
+directions.
 
 The constructive proof has the following dependencies:
 \[
@@ -804,13 +835,15 @@ cycles through four-cycles in the refinement graph.
 
 \section{Machine-checked correspondence}\label{sec:formal}
 
-The main Lean~4 import is \texttt{Hamilton.HamiltonianCycles}, and the final
-classification is
-\leanname{NCRefinementGraph_fin_isHamiltonian_iff}.  To trace an intermediate
-result, locate its paper label in Table~\ref{tab:lean-map} and then search for
-the declarations in the second column.  The table is a navigation index; the
-mathematical identification of the paper's definitions with their Lean
-counterparts is explained in the surrounding prose.
+The main Lean~4 import is \texttt{Hamilton.HamiltonianCycles}.  The final
+cycle and path classifications are
+\leanname{NCRefinementGraph_fin_isHamiltonian_iff} and
+\leanname{NCRefinementGraph_fin_isHamiltonianPath_iff}.  To trace an
+intermediate result, locate its paper label or proof component in
+Table~\ref{tab:lean-map} and then search for the declarations in the second
+column.  The table is a navigation index; the mathematical identification of
+the paper's definitions with their Lean counterparts is explained in the
+surrounding prose.
 
 The first identification to check is graph adjacency.  The declaration
 \begin{center}
@@ -825,13 +858,13 @@ Thus the Lean adjacency is the cover-graph adjacency used in the paper.
 
 \begingroup\footnotesize
 \begin{longtable}{p{0.34\textwidth}p{0.55\textwidth}}
-\caption{Paper statements and Lean declarations.}\label{tab:lean-map}\\
+\caption{Paper-to-Lean correspondence.}\label{tab:lean-map}\\
 \toprule
-Paper label & Lean declarations\\
+Paper statement or proof step & Lean declarations\\
 \midrule
 \endfirsthead
 \toprule
-Paper label & Lean declarations\\
+Paper statement or proof step & Lean declarations\\
 \midrule
 \endhead
 \leanname{def:refinement-graph} &
@@ -880,6 +913,19 @@ Paper label & Lean declarations\\
 \leanname{NCRefinementGraph_fin_even_geq4_isHamiltonian_petersen}\\
 \leanname{thm:classification} &
 \leanname{NCRefinementGraph_fin_isHamiltonian_iff}\\
+\leanname{cor:hamilton-paths} ($n\leq3$) &
+\leanname{NCRefinementGraph_fin_zero_isHamiltonianPath},
+\leanname{NCRefinementGraph_fin_one_isHamiltonianPath},
+\leanname{NCRefinementGraph_fin_two_isHamiltonianPath},
+\leanname{NCRefinementGraph_fin_three_isHamiltonianPath},
+\leanname{cardThree_hamiltonianPath_between_twoBlock}\\
+\leanname{cor:hamilton-paths}: even case &
+\leanname{IsHamiltonian.isHamiltonianPath}\\
+\leanname{cor:hamilton-paths}: odd case &
+\leanname{NCRefinementGraph_evenBlocks_oddBlocks_diff_at_most_one_of_isHamiltonianPath},
+\leanname{NCRefinementGraph_fin_odd_geq5_not_isHamiltonianPath}\\
+\leanname{cor:hamilton-paths}: final &
+\leanname{NCRefinementGraph_fin_isHamiltonianPath_iff}\\
 \bottomrule
 \end{longtable}
 \endgroup
@@ -891,8 +937,8 @@ lake env lean --trust=0 Hamilton/HamiltonianCyclesTheoremMap.lean\\
 lake env lean --trust=0 Hamilton/HamiltonianCyclesAxiomAudit.lean
 \end{quote}
 The first command builds the formalization, the second checks the declarations
-in Table~\ref{tab:lean-map}, and the third reports for the uniform even
-theorem, the odd obstruction, and the complete classification exactly
+in Table~\ref{tab:lean-map}, and the third reports for the audited construction,
+obstruction, cycle-classification, and path-classification endpoints exactly
 \[
  \texttt{[propext, Classical.choice, Quot.sound]}.
 \]
@@ -904,6 +950,12 @@ The audit checks the Lean theorems under their formal definitions and the
 foundational dependencies just listed.  The correspondence between those
 definitions and the mathematical objects in the paper is part of the
 mathematical exposition.
+
+The comparison with the refinement Gray-code problem of Merino, Namrata, and
+Williams is a literature-level identification, not an additional formal
+theorem.  Lean formalizes the merge/split adjacency and the Hamilton-path
+classification; the identification with their externally stated list problem
+uses the definition in the cited work.
 
 \ifnum\blindmode=0
 Archive concept DOI:

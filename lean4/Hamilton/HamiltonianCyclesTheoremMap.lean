@@ -43,3 +43,12 @@ open Hamilton.Infrastructure.Petersen
 #check Global.rootCycleCode_support
 #check NC.NCRefinementGraph_fin_even_geq4_isHamiltonian_petersen
 #check NC.NCRefinementGraph_fin_isHamiltonian_iff
+#check NC.NCRefinementGraph_fin_zero_isHamiltonianPath
+#check NC.NCRefinementGraph_fin_one_isHamiltonianPath
+#check NC.NCRefinementGraph_fin_two_isHamiltonianPath
+#check NC.NCRefinementGraph_fin_three_isHamiltonianPath
+#check SimpleGraph.IsHamiltonian.isHamiltonianPath
+#check NC.NCRefinementGraph_evenBlocks_oddBlocks_diff_at_most_one_of_isHamiltonianPath
+#check NC.cardThree_hamiltonianPath_between_twoBlock
+#check NC.NCRefinementGraph_fin_odd_geq5_not_isHamiltonianPath
+#check NC.NCRefinementGraph_fin_isHamiltonianPath_iff

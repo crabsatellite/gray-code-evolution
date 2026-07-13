@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Mathlib.Combinatorics.SimpleGraph.Hamiltonian
 import Mathlib.Combinatorics.SimpleGraph.Coloring.Constructions
+import Mathlib.Data.Bool.Count
 
 /-!
 # Hamilton paths with prescribed endpoints
@@ -71,6 +72,84 @@ theorem HamiltonianPathBetween.symm {a b : α} (h : G.HamiltonianPathBetween a b
   rw [Walk.support_reverse]
   rw [List.count_reverse]
   exact hp v
+
+/-- A graph with a Hamilton cycle and more than one vertex has a Hamilton
+path.  Delete one edge from the cycle by taking its tail. -/
+theorem IsHamiltonian.isHamiltonianPath [Fintype α]
+    (hG : G.IsHamiltonian) (h_card_ne_one : Fintype.card α ≠ 1) :
+    G.IsHamiltonianPath := by
+  obtain ⟨a, c, hc⟩ := hG h_card_ne_one
+  exact ⟨c.snd, a, c.tail, hc.isHamiltonian_tail⟩
+
+/-- Along a Hamilton path in a properly two-coloured finite graph, the two
+colour classes differ in size by at most one. -/
+theorem Walk.IsHamiltonian.classes_card_diff_at_most_one [Fintype α]
+    {a b : α} {p : G.Walk a b} (hp : p.IsHamiltonian)
+    (c : G.Coloring Bool) :
+    ((Finset.univ : Finset α).filter (fun v => c v = true)).card ≤
+        ((Finset.univ : Finset α).filter (fun v => c v = false)).card + 1 ∧
+      ((Finset.univ : Finset α).filter (fun v => c v = false)).card ≤
+        ((Finset.univ : Finset α).filter (fun v => c v = true)).card + 1 := by
+  classical
+  have h_supp_nodup : p.support.Nodup := hp.isPath.support_nodup
+  have h_supp_len : p.support.length = Fintype.card α := hp.length_support
+  have h_supp_mem : ∀ v, v ∈ p.support := hp.mem_support
+  have h_chain_map : List.IsChain (· ≠ ·) (p.support.map c) :=
+    List.isChain_map_of_isChain c (fun _ _ h => c.valid h) p.isChain_adj_support
+  have h_true_le_false :
+      (p.support.map c).count true ≤ (p.support.map c).count false + 1 := by
+    simpa using h_chain_map.count_not_le_count_add_one false
+  have h_false_le_true :
+      (p.support.map c).count false ≤ (p.support.map c).count true + 1 := by
+    simpa using h_chain_map.count_not_le_count_add_one true
+  have h_supp_val : (p.support : Multiset α) = Finset.univ.val := by
+    refine Multiset.eq_of_le_of_card_le ?_ ?_
+    · rw [Multiset.le_iff_count]
+      intro v
+      have hc1 : (p.support : Multiset α).count v = 1 := by
+        rw [Multiset.coe_count]
+        exact List.count_eq_one_of_mem h_supp_nodup (h_supp_mem v)
+      have hc2 : (Finset.univ.val : Multiset α).count v = 1 :=
+        Multiset.count_eq_one_of_mem Finset.univ.nodup (Finset.mem_univ v)
+      omega
+    · simp [Multiset.coe_card, h_supp_len]
+  have h_to_finset : ∀ x : Bool,
+      (p.support.map c).count x =
+        ((Finset.univ : Finset α).filter (fun v => c v = x)).card := by
+    intro x
+    have h1 : (p.support.map c).count x =
+        ((p.support : Multiset α).map c).count x := by
+      rw [Multiset.map_coe, Multiset.coe_count]
+    rw [h1, Multiset.count_map, h_supp_val]
+    rw [show Multiset.filter (fun v => x = c v) Finset.univ.val =
+          Multiset.filter (fun v => c v = x) Finset.univ.val from
+        Multiset.filter_congr (fun v _ => eq_comm)]
+    rfl
+  constructor
+  · rwa [h_to_finset true, h_to_finset false] at h_true_le_false
+  · rwa [h_to_finset false, h_to_finset true] at h_false_le_true
+
+/-- A Hamilton path in a properly two-coloured finite graph forces its two
+colour classes to differ in size by at most one. -/
+theorem HamiltonianPathBetween.classes_card_diff_at_most_one [Fintype α]
+    {a b : α} (h : G.HamiltonianPathBetween a b) (c : G.Coloring Bool) :
+    ((Finset.univ : Finset α).filter (fun v => c v = true)).card ≤
+        ((Finset.univ : Finset α).filter (fun v => c v = false)).card + 1 ∧
+      ((Finset.univ : Finset α).filter (fun v => c v = false)).card ≤
+        ((Finset.univ : Finset α).filter (fun v => c v = true)).card + 1 := by
+  obtain ⟨p, hp⟩ := h
+  exact hp.classes_card_diff_at_most_one c
+
+/-- If a properly two-coloured finite graph has some Hamilton path, its two
+colour classes differ in size by at most one. -/
+theorem IsHamiltonianPath.classes_card_diff_at_most_one [Fintype α]
+    (h : G.IsHamiltonianPath) (c : G.Coloring Bool) :
+    ((Finset.univ : Finset α).filter (fun v => c v = true)).card ≤
+        ((Finset.univ : Finset α).filter (fun v => c v = false)).card + 1 ∧
+      ((Finset.univ : Finset α).filter (fun v => c v = false)).card ≤
+        ((Finset.univ : Finset α).filter (fun v => c v = true)).card + 1 := by
+  obtain ⟨a, b, hab⟩ := h
+  exact hab.classes_card_diff_at_most_one c
 
 /-- For `G.IsHamiltonian`, the vertex type cardinality is either `1`
 or `≥ 3`.

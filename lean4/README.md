@@ -2,8 +2,8 @@
 # Lean 4 verification
 
 This directory contains the kernel-checked proof accompanying
-*Hamilton Cycles in the Noncrossing Partition Refinement Graph*.
-The root module imports the complete classification theorem and its proof.
+*Hamilton Cycles and Paths in the Noncrossing Partition Refinement Graph*.
+The root module imports the complete cycle and path classifications.
 
 ## Main theorem
 
@@ -11,6 +11,10 @@ The root module imports the complete classification theorem and its proof.
 theorem NCRefinementGraph_fin_isHamiltonian_iff (n : ℕ) :
     (NCRefinementGraph (Finset.univ : Finset (Fin n))).IsHamiltonian ↔
       n = 0 ∨ n = 1 ∨ (Even n ∧ 4 <= n)
+
+theorem NCRefinementGraph_fin_isHamiltonianPath_iff (n : ℕ) :
+    (NCRefinementGraph (Finset.univ : Finset (Fin n))).IsHamiltonianPath ↔
+      n <= 3 ∨ Even n
 ```
 
 For the usual nondegenerate range `n >= 3`, this says exactly that the
@@ -18,6 +22,8 @@ refinement graph has a Hamilton cycle if and only if `n` is even.
 All even `n >= 4` use one uniform Petersen Boolean-block construction.
 Odd `n >= 3` are excluded by a general
 bipartite-imbalance proof, not by enumeration.
+The same signed count gives the complete path classification:
+`NCR(n)` has a Hamilton path exactly when `n <= 3` or `n` is even.
 
 ## Paper-to-kernel map
 
@@ -38,6 +44,7 @@ bipartite-imbalance proof, not by enumeration.
 | `lem:tree-assembly` | Recursive square switching produces one cycle on each block subtree | `edgePieces_pairwise_disjoint`, `subtreeEdgePieceSystem`, `subtreeCycle`, `assembledSubtreeCycleCode_support`, `assembledSubtreeCycleCode_outgoing`, `rootCycleCode_support` |
 | `thm:uniform-even` | Uniform construction for every even order at least four | `NCRefinementGraph_fin_even_geq4_isHamiltonian_petersen` |
 | `thm:classification` | Complete Hamiltonicity classification for every natural n | `NCRefinementGraph_fin_isHamiltonian_iff` |
+| `cor:hamilton-paths` | Complete Hamilton-path classification for every natural n | `NCRefinementGraph_fin_zero_isHamiltonianPath`, `NCRefinementGraph_fin_one_isHamiltonianPath`, `NCRefinementGraph_fin_two_isHamiltonianPath`, `NCRefinementGraph_fin_three_isHamiltonianPath`, `cardThree_hamiltonianPath_between_twoBlock`, `IsHamiltonian.isHamiltonianPath`, `NCRefinementGraph_evenBlocks_oddBlocks_diff_at_most_one_of_isHamiltonianPath`, `NCRefinementGraph_fin_odd_geq5_not_isHamiltonianPath`, `NCRefinementGraph_fin_isHamiltonianPath_iff` |
 
 ## Verification
 
@@ -47,7 +54,7 @@ minutes while Lean compiles the complete transitive proof dependency set.
 ```powershell
 python ../scripts/verify_manuscript.py
 lake exe cache get
-lake build Hamilton.Infrastructure.HamiltonianClassification
+lake build Hamilton.Infrastructure.HamiltonPathClassification
 lake build Hamilton.HamiltonianCycles
 lake env lean Hamilton/HamiltonianCyclesTheoremMap.lean
 lake env lean --trust=0 Hamilton/HamiltonianCyclesAxiomAudit.lean
@@ -58,7 +65,7 @@ Use the pinned manifest directly; do not run `lake update`. On Windows,
 extract the package to a short path such as `C:\\gray-proof` so that
 Mathlib's longest source paths remain below the Win32 path limit.
 
-The expected axiom output for the five audited endpoints is exactly
+The expected axiom output for the six audited endpoints is exactly
 `[propext, Classical.choice, Quot.sound]`. These are Lean/Mathlib's standard
 logical quotient and classical-choice dependencies; there is no project
 axiom, `sorry`, `admit`, or `native_decide` in the publication closure.
@@ -73,3 +80,5 @@ axiom, `sorry`, `admit`, or `native_decide` in the publication closure.
 - `PetersenGlobalCycle`: well-founded simultaneous block-tree assembly.
 - `SignedDyckInvolution`: the signed count and odd-order obstruction.
 - `HamiltonianClassification`: the complete theorem for every `n`.
+- `CardThreeHamiltonPath`: the explicit five-vertex small case.
+- `HamiltonPathClassification`: the complete path theorem.

@@ -1,4 +1,4 @@
-# Hamilton Cycles in the Noncrossing Partition Refinement Graph
+# Hamilton Cycles and Paths in the Noncrossing Partition Refinement Graph
 
 This repository contains the manuscript and a Lean 4 formalization of its
 complete classification theorem.
@@ -8,6 +8,7 @@ complete classification theorem.
 For every natural number `n`, the noncrossing partition refinement graph is
 Hamiltonian exactly when `n = 0`, `n = 1`, or `n` is even and `n >= 4`.
 For the usual range `n >= 3`, this is equivalent to `n` being even.
+It has a Hamilton path exactly when `n <= 3` or `n` is even.
 
 Archive:
 
@@ -33,7 +34,9 @@ count of noncrossing partitions. The even case uses canonical
 matching/Boolean-mask coordinates, cyclic Gray codes inside each Boolean
 block, a rooted tree of canonical matchings, explicit joining diamonds, and
 recursive square switching. The theorem for all natural numbers is
-`NCRefinementGraph_fin_isHamiltonian_iff`.
+`NCRefinementGraph_fin_isHamiltonian_iff`. The same signed count, together
+with explicit small cases, gives `NCRefinementGraph_fin_isHamiltonianPath_iff`:
+a Hamilton path exists exactly when `n <= 3` or `n` is even.
 
 ## Verification
 
