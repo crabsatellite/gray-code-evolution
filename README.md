@@ -9,10 +9,9 @@ For every natural number `n`, the noncrossing partition refinement graph is
 Hamiltonian exactly when `n = 0`, `n = 1`, or `n` is even and `n >= 4`.
 For the usual range `n >= 3`, this is equivalent to `n` being even.
 
-Archival identifiers:
+Archive:
 
-- Version v1.0.0: [10.5281/zenodo.21316751](https://doi.org/10.5281/zenodo.21316751)
-- All versions: [10.5281/zenodo.21316750](https://doi.org/10.5281/zenodo.21316750)
+- Concept DOI: [10.5281/zenodo.21316750](https://doi.org/10.5281/zenodo.21316750)
 
 ## Contents
 
@@ -59,4 +58,4 @@ longest source paths remain below the Win32 path limit.
 ## Licensing
 
 See `LICENSE.md`. Lean source and verification scripts are Apache-2.0; the
-manuscript is CC BY-ND 4.0.
+manuscript is CC BY 4.0.

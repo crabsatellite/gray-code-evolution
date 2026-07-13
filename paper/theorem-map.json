@@ -2,7 +2,7 @@
   {
     "label": "def:refinement-graph",
     "title": "Refinement-graph adjacency is exactly one explicit block merge or split",
-    "lean": ["NCRefinementGraph_adj_iff_single_merge"]
+    "lean": ["NCRefinementGraph_adj_iff_single_merge", "mergesTo_numBlocks", "mergesTo_le"]
   },
   {
     "label": "lem:bipartite",
@@ -22,7 +22,7 @@
   {
     "label": "lem:key-fibers",
     "title": "Decoded key fibers are noncrossing",
-    "lean": ["commonKey_root_or_chord", "point_in_chord_hull", "point_avoids_nested_chord", "root_point_avoids_chord"]
+    "lean": ["commonKey_root_or_chord", "point_in_chord_hull", "point_avoids_nested_chord", "root_point_avoids_chord", "decodedFinpartition_isNoncrossing"]
   },
   {
     "label": "thm:boolean-decomposition",
@@ -35,6 +35,11 @@
     "lean": ["rankGrayCycle", "rankGrayVertices_nodup", "rankGrayVertices_chain"]
   },
   {
+    "label": "lem:gray-ports",
+    "title": "The reflected Gray cycle contains the required low-coordinate and closing port edges",
+    "lean": ["coordinateZero_rankGray_consecutive", "coordinateOne_rankGray_consecutive", "rankGray_closing_flip"]
+  },
+  {
     "label": "lem:canonical-block-tree",
     "title": "Lexicographic chord deletion defines the rooted block tree",
     "lean": ["parent_card", "parentOption_eq_none_iff", "inSubtree_root"]
@@ -42,7 +47,7 @@
   {
     "label": "lem:joining-diamond",
     "title": "Every parent-child edge has an explicit joining diamond",
-    "lean": ["joiningDiamond_nonempty", "joiningDiamond"]
+    "lean": ["parent_decodeKey_eq_relabel_child", "decodedNC_child_adj_parentMask", "joiningDiamond_nonempty", "joiningDiamond"]
   },
   {
     "label": "lem:port-injection",
@@ -50,9 +55,14 @@
     "lean": ["portAssignedToPair_exists", "assignedPair_injective", "outgoingPair_not_assigned"]
   },
   {
+    "label": "lem:piece-concatenation",
+    "title": "Pairwise-disjoint directed edge pieces flatten to one cyclic code",
+    "lean": ["EdgePieceSystem.toCycleCode"]
+  },
+  {
     "label": "lem:tree-assembly",
     "title": "Recursive square switching produces one cycle on each block subtree",
-    "lean": ["EdgePieceSystem.toCycleCode", "subtreeCycle", "rootCycleCode_support"]
+    "lean": ["edgePieces_pairwise_disjoint", "subtreeEdgePieceSystem", "subtreeCycle", "assembledSubtreeCycleCode_support", "assembledSubtreeCycleCode_outgoing", "rootCycleCode_support"]
   },
   {
     "label": "thm:uniform-even",

@@ -23,17 +23,19 @@ bipartite-imbalance proof, not by enumeration.
 
 | Paper label | Mathematical statement | Lean declarations |
 |---|---|---|
-| `def:refinement-graph` | Refinement-graph adjacency is exactly one explicit block merge or split | `NCRefinementGraph_adj_iff_single_merge` |
+| `def:refinement-graph` | Refinement-graph adjacency is exactly one explicit block merge or split | `NCRefinementGraph_adj_iff_single_merge`, `mergesTo_numBlocks`, `mergesTo_le` |
 | `lem:bipartite` | Block-count parity is a bipartition | `NCRefinementGraph_isBipartite` |
 | `thm:signed-count` | Closed form for the signed noncrossing-partition count | `signedDyckSumTree_closed_form`, `signedNCCount_univ_eq_signedDyckSumTree` |
 | `thm:odd-obstruction` | Odd orders at least three are not Hamiltonian | `NCRefinementGraph_fin_odd_geq3_not_isHamiltonian` |
-| `lem:key-fibers` | Decoded key fibers are noncrossing | `commonKey_root_or_chord`, `point_in_chord_hull`, `point_avoids_nested_chord`, `root_point_avoids_chord` |
+| `lem:key-fibers` | Decoded key fibers are noncrossing | `commonKey_root_or_chord`, `point_in_chord_hull`, `point_avoids_nested_chord`, `root_point_avoids_chord`, `decodedFinpartition_isNoncrossing` |
 | `thm:boolean-decomposition` | Canonical matching and mask coordinates are bijective | `decodeState_bijective`, `stateEquivNC`, `decodedNC_mergesTo_insert` |
 | `lem:block-gray-cycle` | Every odd-dimensional Boolean block has a reflected Gray cycle | `rankGrayCycle`, `rankGrayVertices_nodup`, `rankGrayVertices_chain` |
+| `lem:gray-ports` | The reflected Gray cycle contains the required low-coordinate and closing port edges | `coordinateZero_rankGray_consecutive`, `coordinateOne_rankGray_consecutive`, `rankGray_closing_flip` |
 | `lem:canonical-block-tree` | Lexicographic chord deletion defines the rooted block tree | `parent_card`, `parentOption_eq_none_iff`, `inSubtree_root` |
-| `lem:joining-diamond` | Every parent-child edge has an explicit joining diamond | `joiningDiamond_nonempty`, `joiningDiamond` |
+| `lem:joining-diamond` | Every parent-child edge has an explicit joining diamond | `parent_decodeKey_eq_relabel_child`, `decodedNC_child_adj_parentMask`, `joiningDiamond_nonempty`, `joiningDiamond` |
 | `lem:port-injection` | Incoming ports are injective and avoid the outgoing port | `portAssignedToPair_exists`, `assignedPair_injective`, `outgoingPair_not_assigned` |
-| `lem:tree-assembly` | Recursive square switching produces one cycle on each block subtree | `EdgePieceSystem.toCycleCode`, `subtreeCycle`, `rootCycleCode_support` |
+| `lem:piece-concatenation` | Pairwise-disjoint directed edge pieces flatten to one cyclic code | `EdgePieceSystem.toCycleCode` |
+| `lem:tree-assembly` | Recursive square switching produces one cycle on each block subtree | `edgePieces_pairwise_disjoint`, `subtreeEdgePieceSystem`, `subtreeCycle`, `assembledSubtreeCycleCode_support`, `assembledSubtreeCycleCode_outgoing`, `rootCycleCode_support` |
 | `thm:uniform-even` | Uniform construction for every even order at least four | `NCRefinementGraph_fin_even_geq4_isHamiltonian_petersen` |
 | `thm:classification` | Complete Hamiltonicity classification for every natural n | `NCRefinementGraph_fin_isHamiltonian_iff` |
 

@@ -93,9 +93,11 @@ def main() -> int:
         if re.search(pattern, tex, re.IGNORECASE):
             fail(f"{description} found in manuscript")
 
-    for doi in ("10.5281/zenodo.21316751", "10.5281/zenodo.21316750"):
-        if doi not in tex:
-            fail(f"missing archival DOI {doi}")
+    concept_doi = "10.5281/zenodo.21316750"
+    if concept_doi not in tex:
+        fail(f"missing concept DOI {concept_doi}")
+    if "10.5281/zenodo.21316751" in tex:
+        fail("version-specific Zenodo DOI found; cite only the concept DOI")
 
     claims = json.loads(THEOREM_MAP.read_text(encoding="utf-8"))
     sources = declaration_sources()
@@ -117,7 +119,7 @@ def main() -> int:
 
     print(
         f"[manuscript:ok] citations={len(cited)} theorem_map={len(claims)} "
-        "archive_dois=2"
+        "archive_dois=1"
     )
     return 0
 
