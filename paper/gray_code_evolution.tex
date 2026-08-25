@@ -972,14 +972,14 @@ is omitted from this anonymous copy.
 
 \section*{Declaration of Generative AI and AI-Assisted Technologies in the Manuscript Preparation Process}
 
-During the preparation of this work, the author used OpenAI Codex for
-exploratory proof development, drafting and copy-editing, code development,
-and the Lean~4 formalization.  Claude (Anthropic) was used during the initial
-exploration.  The author checked the mathematical claims and citations,
-compared the manuscript statements with the Lean declarations, and reran the
-formal build and axiom audit.  AI output is not treated as mathematical
-evidence.  The author is responsible for the definitions, proofs, citations,
-code, and manuscript.
+During the preparation of this work, the author used an author-developed local
+implementation of the Proof Engine framework for AI-assisted mathematical
+research.  The implementation operates through replaceable AI-agent and
+harness components; the present work used OpenAI Codex and Claude Code within
+that implementation.  The framework is described in \emph{Proof Engine
+Infrastructure}~\cite{LiProofEngine}.  The author reviewed and edited the
+resulting material and assumes full responsibility for the definitions,
+statements, proofs, citations, code, and exposition.
 
 \ifnum\blindmode=0
 \subsection*{Acknowledgements}
@@ -993,7 +993,7 @@ environment.
 A.~C.~Li,
 Proof Engine Infrastructure: A Claim-Graph Framework for AI-Assisted
 Mathematical Research,
-Zenodo concept DOI \doi{10.5281/zenodo.21672333}, 2026.
+SSRN Scholarly Paper 7237460, \doi{10.2139/ssrn.7237460}, 2026.
 
 \bibitem{HHMW}
 E.~Hartung, H.~P.~Hoang, T.~M\"utze, and A.~Williams,
